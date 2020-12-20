@@ -12,7 +12,7 @@ import lombok.experimental.SuperBuilder;
 @Data
 @NoArgsConstructor
 @SuperBuilder
-public abstract class DirectMapping<E extends Object>{
+public abstract class DirectMapping<E extends Object> {
 
     public DirectMapping(E object){
 

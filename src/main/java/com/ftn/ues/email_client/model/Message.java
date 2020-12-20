@@ -1,5 +1,6 @@
 package com.ftn.ues.email_client.model;
 
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -7,6 +8,7 @@ import lombok.experimental.SuperBuilder;
 import org.joda.time.DateTime;
 
 import javax.persistence.*;
+import java.util.HashSet;
 import java.util.Set;
 
 @Data
@@ -44,14 +46,17 @@ public class Message extends Identifiable{
     @Column(nullable = false)
     private Boolean unread;
 
+    @Builder.Default
     @OneToMany(mappedBy = "message", orphanRemoval = true)
-    private Set<Attachment> attachments;
+    private Set<Attachment> attachments = new HashSet<>();
 
+    @Builder.Default
     @ManyToMany
-    private Set<Tag> tags;
+    private Set<Tag> tags = new HashSet<>();
 
-    @Column(name = "parent_folder")
-    private String parentFolder;
+    @ManyToOne
+    @JoinColumn(name = "parent_folder")
+    private Folder parentFolder;
 
     @NonNull
     @ManyToOne

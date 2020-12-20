@@ -4,6 +4,7 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import javax.persistence.*;
+import java.util.HashSet;
 import java.util.Set;
 
 @Data
@@ -30,8 +31,9 @@ public class Contact extends Identifiable{
     private String note;
 
     @NonNull
+    @Builder.Default
     @OneToMany(mappedBy = "contact", orphanRemoval = true)
-    private Set<Photo> photos;
+    private Set<Photo> photos = new HashSet<>();
 
     @NonNull
     @ManyToOne

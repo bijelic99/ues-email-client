@@ -4,6 +4,7 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import javax.persistence.*;
+import java.util.HashSet;
 import java.util.Set;
 
 @Data
@@ -50,6 +51,7 @@ public class Account extends Identifiable {
     private User user;
 
     @NonNull
+    @Builder.Default
     @OneToMany(mappedBy = "account", orphanRemoval = true)
-    private Set<Folder> folders;
+    private Set<Folder> folders = new HashSet<>();
 }

@@ -7,6 +7,7 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.OneToMany;
 import javax.persistence.Table;
+import java.util.HashSet;
 import java.util.Set;
 
 @Data
@@ -29,12 +30,15 @@ public class User extends Identifiable {
     @Column(name = "last_name")
     private String lastName;
 
+    @Builder.Default
     @OneToMany(mappedBy = "user", orphanRemoval = true)
-    private Set<Tag> userTags;
+    private Set<Tag> userTags = new HashSet<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "user", orphanRemoval = true)
-    private Set<Account> userAccounts;
+    private Set<Account> userAccounts = new HashSet<>();
 
+    @Builder.Default
     @OneToMany(mappedBy = "user", orphanRemoval = true)
-    private Set<Contact> userContacts;
+    private Set<Contact> userContacts = new HashSet<>();
 }

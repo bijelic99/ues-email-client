@@ -26,8 +26,9 @@ public class Rule extends Identifiable {
     @Column(nullable = false)
     private RuleOperation operation;
 
-    @Column(name = "destination_folder")
-    private String destinationFolder;
+    @ManyToOne
+    @JoinColumn(name = "destination_folder")
+    private Folder destinationFolder;
 
     @NonNull
     @ManyToOne

@@ -23,13 +23,13 @@ public class AccountECRepository {
             case POP3: {
                 properties.put("mail.pop3.host", account.getInServerAddress());
                 properties.put("mail.pop3.port", account.getInServerPort());
-                properties.put("mail.pop3.ssl.enable", "true");
+                properties.put("mail.pop3.ssl.enable", "false");
                 break;
             }
             case IMAP: {
                 properties.put("mail.imap.host", account.getInServerAddress());
                 properties.put("mail.imap.port", account.getInServerPort());
-                properties.put("mail.imap.ssl.enable", "true");
+                properties.put("mail.imap.ssl.enable", "false");
                 break;
             }
             default:{
