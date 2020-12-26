@@ -7,7 +7,9 @@ import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
 
-@Data
+@Getter
+@Setter
+@RequiredArgsConstructor
 @SuperBuilder
 @NoArgsConstructor
 @Entity
@@ -16,6 +18,10 @@ public class Folder extends Identifiable {
     @NonNull
     @Column(nullable = false)
     private String name;
+
+    @NonNull
+    @Column(nullable = false, name = "folder_url")
+    private String folderUrl;
 
     @NonNull
     @Builder.Default

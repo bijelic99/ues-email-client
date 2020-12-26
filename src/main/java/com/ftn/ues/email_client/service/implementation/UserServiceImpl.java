@@ -17,9 +17,6 @@ public class UserServiceImpl implements UserService {
         //Do the validation
         if (userRepository.findByUsername(user.getUsername()).isPresent()) throw new Exception("Username taken");
         if (user.getPassword().isBlank()) throw new Exception("Password cannot be empty");
-
-        user = userRepository.save(user);
-
-        return user;
+        return userRepository.save(user);
     }
 }

@@ -1,5 +1,6 @@
 package com.ftn.ues.email_client.dao;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.ftn.ues.email_client.model.Identifiable;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -22,5 +23,6 @@ public abstract class DirectMapping<E extends Object> {
      * Returns object of E extends Identifiable type created from current object
      * @return
      */
+    @JsonIgnore
     public abstract E getModelObject();
 }

@@ -5,6 +5,7 @@ import com.ftn.ues.email_client.model.Message;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.experimental.SuperBuilder;
+import org.springframework.data.elasticsearch.annotations.Document;
 
 @Data
 @AllArgsConstructor

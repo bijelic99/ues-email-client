@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Set;
 
 @Service
 public class AccountServiceImpl implements AccountService {
@@ -27,13 +26,14 @@ public class AccountServiceImpl implements AccountService {
     public Account addAccount(Account account) throws Exception {
         var userOpt = userRepository.findById(account.getUser().getId());
         if (userOpt.isEmpty()) throw new Exception("Cannot add an account for non existing user");
-        account = accountRepository.save(account);
+        accountRepository.save(account);
         folderService.fetchFolderStructure(account);
-        return account;
+        return accountRepository.getOne(account.getId());
     }
 
     @Override
     public List<Account> getAll() {
-        return accountRepository.findAll();
+        var accounts = accountRepository.findAll();
+        return accounts;
     }
 }

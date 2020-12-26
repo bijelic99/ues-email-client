@@ -5,11 +5,13 @@ import com.ftn.ues.email_client.model.Folder;
 import com.ftn.ues.email_client.model.RuleCondition;
 import com.ftn.ues.email_client.model.RuleOperation;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.experimental.SuperBuilder;
 
 @Data
 @SuperBuilder
+@NoArgsConstructor
 public class Rule extends DirectMapping<com.ftn.ues.email_client.model.Rule> {
 
     public Rule(com.ftn.ues.email_client.model.Rule rule){

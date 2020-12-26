@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 
 @Data
 @SuperBuilder
+@NoArgsConstructor
 public class Folder extends DirectMapping<com.ftn.ues.email_client.model.Folder> {
 
     public Folder(com.ftn.ues.email_client.model.Folder folder){

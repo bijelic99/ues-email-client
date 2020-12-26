@@ -6,6 +6,7 @@ import com.ftn.ues.email_client.model.Identifiable;
 import com.ftn.ues.email_client.model.Tag;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.experimental.SuperBuilder;
 
@@ -15,6 +16,7 @@ import java.util.stream.Collectors;
 
 @Data
 @SuperBuilder
+@NoArgsConstructor
 public class User extends DirectMapping<com.ftn.ues.email_client.model.User> {
 
     public User(com.ftn.ues.email_client.model.User user) {

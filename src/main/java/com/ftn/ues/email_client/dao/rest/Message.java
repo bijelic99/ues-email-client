@@ -1,10 +1,12 @@
 package com.ftn.ues.email_client.dao.rest;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.ftn.ues.email_client.dao.DirectMapping;
 import com.ftn.ues.email_client.model.Account;
 import com.ftn.ues.email_client.model.Folder;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.experimental.SuperBuilder;
 import org.joda.time.DateTime;
@@ -15,6 +17,7 @@ import java.util.stream.Collectors;
 
 @Data
 @SuperBuilder
+@NoArgsConstructor
 public class Message extends DirectMapping<com.ftn.ues.email_client.model.Message> {
 
     public Message(com.ftn.ues.email_client.model.Message message){
@@ -46,6 +49,7 @@ public class Message extends DirectMapping<com.ftn.ues.email_client.model.Messag
 
     private String bcc;
 
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss:SSSZZ")
     private DateTime dateTime;
 
     @NonNull

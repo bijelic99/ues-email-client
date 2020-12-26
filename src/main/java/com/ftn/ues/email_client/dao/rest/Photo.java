@@ -9,6 +9,7 @@ import lombok.experimental.SuperBuilder;
 
 @Data
 @SuperBuilder
+@NoArgsConstructor
 public class Photo extends DirectMapping<com.ftn.ues.email_client.model.Photo> {
 
     public Photo(com.ftn.ues.email_client.model.Photo photo){

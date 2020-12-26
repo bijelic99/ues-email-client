@@ -10,7 +10,9 @@ import javax.persistence.Table;
 import java.util.HashSet;
 import java.util.Set;
 
-@Data
+@Getter
+@Setter
+@RequiredArgsConstructor
 @SuperBuilder
 @NoArgsConstructor
 @Entity

@@ -3,11 +3,13 @@ package com.ftn.ues.email_client.dao.rest;
 import com.ftn.ues.email_client.dao.DirectMapping;
 import com.ftn.ues.email_client.model.User;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.experimental.SuperBuilder;
 
 @Data
 @SuperBuilder
+@NoArgsConstructor
 public class Tag extends DirectMapping<com.ftn.ues.email_client.model.Tag> {
 
     public Tag(com.ftn.ues.email_client.model.Tag tag){

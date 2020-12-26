@@ -1,17 +1,17 @@
 package com.ftn.ues.email_client.model;
 
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.NonNull;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.Type;
 import org.joda.time.DateTime;
 
 import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
 
-@Data
+@Getter
+@Setter
+@RequiredArgsConstructor
 @SuperBuilder
 @NoArgsConstructor
 @Entity
@@ -31,7 +31,7 @@ public class Message extends Identifiable{
     @Column
     private String bcc;
 
-    @Column(name = "date_time", nullable = false)
+    @Column(name = "date_time", nullable = false) @Type(type="org.jadira.usertype.dateandtime.joda.PersistentDateTime")
     private DateTime dateTime;
 
     @NonNull
@@ -39,6 +39,7 @@ public class Message extends Identifiable{
     private String subject;
 
     @NonNull
+    @Lob
     @Column(nullable = false)
     private String content;
 

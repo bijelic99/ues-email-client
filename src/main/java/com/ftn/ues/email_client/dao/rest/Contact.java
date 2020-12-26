@@ -4,6 +4,7 @@ import com.ftn.ues.email_client.dao.DirectMapping;
 import com.ftn.ues.email_client.model.User;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.experimental.SuperBuilder;
 
@@ -13,6 +14,7 @@ import java.util.stream.Collectors;
 
 @Data
 @SuperBuilder
+@NoArgsConstructor
 public class Contact extends DirectMapping<com.ftn.ues.email_client.model.Contact> {
 
     public Contact(com.ftn.ues.email_client.model.Contact contact){

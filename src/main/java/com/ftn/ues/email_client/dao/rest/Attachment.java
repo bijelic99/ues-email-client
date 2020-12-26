@@ -4,14 +4,13 @@ package com.ftn.ues.email_client.dao.rest;
 import com.ftn.ues.email_client.dao.DirectMapping;
 import com.ftn.ues.email_client.model.Message;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import lombok.experimental.SuperBuilder;
 
-import javax.persistence.Column;
-import javax.persistence.ManyToOne;
-
 @Data
 @SuperBuilder
+@NoArgsConstructor
 public class Attachment extends DirectMapping<com.ftn.ues.email_client.model.Attachment> {
 
     public Attachment(com.ftn.ues.email_client.model.Attachment attachment){
