@@ -1,9 +1,10 @@
 package com.ftn.ues.email_client.service.implementation;
 
-import com.ftn.ues.email_client.model.Account;
 import com.ftn.ues.email_client.model.Folder;
-import com.ftn.ues.email_client.model.InServerType;
+import com.ftn.ues.email_client.model.*;
+import com.ftn.ues.email_client.repository.database.AttachmentRepository;
 import com.ftn.ues.email_client.repository.database.MessageRepository;
+import com.ftn.ues.email_client.service.FileStorageService;
 import com.ftn.ues.email_client.service.MailClientService;
 import com.ftn.ues.email_client.util.JavaxMailMessageToMessageConverter;
 import com.sun.mail.pop3.POP3Store;
@@ -20,6 +21,12 @@ public class MailClientServiceImpl implements MailClientService {
 
     @Autowired
     MessageRepository messageRepository;
+
+    @Autowired
+    AttachmentRepository attachmentRepository;
+
+    @Autowired
+    FileStorageService fileStorageService;
 
     @Override
     public Properties getProperties(@NonNull Account account) {
@@ -130,23 +137,47 @@ public class MailClientServiceImpl implements MailClientService {
                     }
                     return resOpt.stream().map(o -> (JavaxMailMessageToMessageConverter.ParsedMessage) o);
                 })
-                .map(parsedMessage ->
-                        com.ftn.ues.email_client.model.Message.builder()
-                                .id(parsedMessage.getId())
-                                .from(parsedMessage.getFrom())
-                                .to(parsedMessage.getTo())
-                                .cc(parsedMessage.getCc())
-                                .bcc(parsedMessage.getBcc())
-                                .dateTime(parsedMessage.getDateTime())
-                                .subject(parsedMessage.getSubject())
-                                .content(parsedMessage.getContent())
-                                .attachments(new HashSet<>())
-                                .unread(false)
-                                .parentFolder(folder)
-                                .account(folder.getAccount())
-                                .build())
+                .map(parsedMessage -> {
+                    var message = com.ftn.ues.email_client.model.Message.builder()
+                            .id(null)
+                            .from(parsedMessage.getFrom())
+                            .to(parsedMessage.getTo())
+                            .cc(parsedMessage.getCc())
+                            .bcc(parsedMessage.getBcc())
+                            .dateTime(parsedMessage.getDateTime())
+                            .subject(parsedMessage.getSubject())
+                            .content(parsedMessage.getContent())
+                            .unread(false)
+                            .parentFolder(folder)
+                            .account(folder.getAccount())
+                            .build();
+                    var attachments = parsedMessage.getAttachments().stream()
+                            .flatMap(attachmentData -> {
+                                var resOpt = Optional.empty();
+                                try {
+                                    var path = fileStorageService.addAttachment(attachmentData);
+                                    resOpt = Optional.of(Attachment.builder()
+                                            .id(null)
+                                            .path(path)
+                                            .mimeType(attachmentData.getMimeType())
+                                            .name(attachmentData.getFilename())
+                                            .message(message)
+                                            .build());
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                                return resOpt.stream().map(o -> (Attachment) o);
+                            }).collect(Collectors.toSet());
+                    message.setAttachments(attachments);
+                    return message;
+                })
                 .collect(Collectors.toList());
+
         newMessages = messageRepository.saveAll(newMessages);
+        var attachments = newMessages.stream().flatMap(message -> message.getAttachments().stream()).collect(Collectors.toList());
+        attachmentRepository.saveAll(attachments);
+        newMessages = messageRepository.findAllById(newMessages.stream().map(Identifiable::getId).collect(Collectors.toSet()));
+
         folder.getMessages().addAll(newMessages);
         return folder;
     }
