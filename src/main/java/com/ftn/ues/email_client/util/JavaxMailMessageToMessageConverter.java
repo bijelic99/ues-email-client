@@ -9,17 +9,13 @@ import javax.mail.internet.ContentType;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public interface JavaxMailMessageToMessageConverter {
-    static ParsedMessage convertToMessage(javax.mail.Message jMessage) throws MessagingException, IOException {
+    static ParsedMessage convertToMessage(javax.mail.Message jMessage, String uid) throws MessagingException, IOException {
 
-        var sentDate = jMessage.getSentDate() == null ? new Date() : jMessage.getSentDate();
-        Long id = sentDate.getTime();
+        String id = uid != null ? uid : UUID.randomUUID().toString();
         var fromAddresses = jMessage.getFrom();
         String from =
                 fromAddresses != null ? Arrays.stream(fromAddresses)
@@ -37,7 +33,7 @@ public interface JavaxMailMessageToMessageConverter {
         String bcc = bccAddresses != null ? Arrays.stream(bccAddresses)
                 .map(Address::toString)
                 .collect(Collectors.joining(", ")) : "";
-        DateTime dateTime = new DateTime(sentDate.getTime());
+        DateTime dateTime = new DateTime((jMessage.getSentDate() == null ? new Date() : jMessage.getSentDate()).getTime());
         String subject = jMessage.getSubject();
         List<Object> contents = parsePart(jMessage);
         var content = contents.stream()
@@ -89,7 +85,7 @@ public interface JavaxMailMessageToMessageConverter {
     @AllArgsConstructor
     @Getter
     class ParsedMessage {
-        private final Long id;
+        private final String id;
         private final String from;
         private final String to;
         private final String cc;

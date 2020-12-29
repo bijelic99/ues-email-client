@@ -17,6 +17,10 @@ import java.util.Set;
 @Entity
 @Table(name = "message")
 public class Message extends Identifiable{
+
+    @Column(name = "message_uid")
+    private String messageUid;
+
     @NonNull
     @Column(name = "_from", nullable = false)
     private String from;

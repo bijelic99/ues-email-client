@@ -2,11 +2,13 @@ package com.ftn.ues.email_client.service.implementation;
 
 import com.ftn.ues.email_client.model.Folder;
 import com.ftn.ues.email_client.model.*;
+import com.ftn.ues.email_client.model.Message;
 import com.ftn.ues.email_client.repository.database.AttachmentRepository;
 import com.ftn.ues.email_client.repository.database.MessageRepository;
 import com.ftn.ues.email_client.service.FileStorageService;
 import com.ftn.ues.email_client.service.MailClientService;
 import com.ftn.ues.email_client.util.JavaxMailMessageToMessageConverter;
+import com.sun.mail.pop3.POP3Folder;
 import com.sun.mail.pop3.POP3Store;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
@@ -125,13 +127,13 @@ public class MailClientServiceImpl implements MailClientService {
         var store = (POP3Store) getStore(folder.getAccount());
         store.connect();
 
-        javax.mail.Folder serverFolder = store.getFolder("INBOX");
+        POP3Folder serverFolder = (POP3Folder) store.getFolder("INBOX");
         serverFolder.open(javax.mail.Folder.READ_ONLY);
         var newMessages = Arrays.stream(serverFolder.getMessages())
                 .flatMap(message -> {
                     var resOpt = Optional.empty();
                     try {
-                        resOpt = Optional.of(JavaxMailMessageToMessageConverter.convertToMessage(message));
+                        resOpt = Optional.of(JavaxMailMessageToMessageConverter.convertToMessage(message, serverFolder.getUID(message)));
                     } catch (Exception e) {
                         e.printStackTrace();
                     }
@@ -140,6 +142,7 @@ public class MailClientServiceImpl implements MailClientService {
                 .map(parsedMessage -> {
                     var message = com.ftn.ues.email_client.model.Message.builder()
                             .id(null)
+                            .messageUid(parsedMessage.getId())
                             .from(parsedMessage.getFrom())
                             .to(parsedMessage.getTo())
                             .cc(parsedMessage.getCc())
@@ -173,8 +176,13 @@ public class MailClientServiceImpl implements MailClientService {
                 })
                 .collect(Collectors.toList());
 
+        newMessages = newMessages.stream()
+                .filter(message -> folder.getMessages()
+                        .stream().noneMatch(m->m.getMessageUid().equals(message.getMessageUid()))
+                )
+                .collect(Collectors.toList());
         newMessages = messageRepository.saveAll(newMessages);
-        var attachments = newMessages.stream().flatMap(message -> message.getAttachments().stream()).collect(Collectors.toList());
+        var attachments = newMessages.stream().map(Message::getAttachments).flatMap(Collection::stream).collect(Collectors.toList());
         attachmentRepository.saveAll(attachments);
         newMessages = messageRepository.findAllById(newMessages.stream().map(Identifiable::getId).collect(Collectors.toSet()));
 
