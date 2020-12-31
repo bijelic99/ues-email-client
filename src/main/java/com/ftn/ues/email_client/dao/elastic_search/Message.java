@@ -22,12 +22,16 @@ public class Message extends DirectMapping<com.ftn.ues.email_client.model.Messag
 
     @Id
     private Long id;
+    @Field(type = FieldType.Text, analyzer = "serbian", searchAnalyzer = "serbian")
     private String from;
+    @Field(type = FieldType.Text, analyzer = "serbian", searchAnalyzer = "serbian")
     private String to;
     private String cc;
     private String bcc;
     private DateTime dateTime;
+    @Field(type = FieldType.Text, analyzer = "serbian", searchAnalyzer = "serbian")
     private String subject;
+    @Field(type = FieldType.Text, analyzer = "serbian", searchAnalyzer = "serbian")
     private String content;
     private Boolean unread;
     @Field(type = FieldType.Nested, includeInParent = true)
