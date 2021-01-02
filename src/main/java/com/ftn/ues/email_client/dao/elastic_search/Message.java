@@ -1,10 +1,12 @@
 package com.ftn.ues.email_client.dao.elastic_search;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.ftn.ues.email_client.dao.DirectMapping;
 import com.ftn.ues.email_client.model.Account;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.experimental.SuperBuilder;
+import org.hibernate.annotations.Type;
 import org.joda.time.DateTime;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.elasticsearch.annotations.Document;
@@ -22,23 +24,36 @@ public class Message extends DirectMapping<com.ftn.ues.email_client.model.Messag
 
     @Id
     private Long id;
+
     @Field(type = FieldType.Text, analyzer = "serbian", searchAnalyzer = "serbian")
     private String from;
+
     @Field(type = FieldType.Text, analyzer = "serbian", searchAnalyzer = "serbian")
     private String to;
+
     private String cc;
+
     private String bcc;
+
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss:SSSZZ")
     private DateTime dateTime;
+
     @Field(type = FieldType.Text, analyzer = "serbian", searchAnalyzer = "serbian")
     private String subject;
+
     @Field(type = FieldType.Text, analyzer = "serbian", searchAnalyzer = "serbian")
     private String content;
+
     private Boolean unread;
+
     @Field(type = FieldType.Nested, includeInParent = true)
     private Set<Attachment> Attachments;
+
     @Field(type = FieldType.Nested, includeInParent = true)
     private Set<Tag> Tags;
+
     private String parentFolder;
+
     private Long account;
 
     public Message(com.ftn.ues.email_client.model.Message object) {

@@ -1,8 +1,8 @@
 package com.ftn.ues.email_client.service.implementation;
 
 import com.ftn.ues.email_client.model.Folder;
-import com.ftn.ues.email_client.model.*;
 import com.ftn.ues.email_client.model.Message;
+import com.ftn.ues.email_client.model.*;
 import com.ftn.ues.email_client.repository.database.AttachmentRepository;
 import com.ftn.ues.email_client.repository.database.MessageRepository;
 import com.ftn.ues.email_client.service.FileStorageService;
@@ -135,7 +135,9 @@ public class MailClientServiceImpl implements MailClientService {
 
         POP3Folder serverFolder = (POP3Folder) store.getFolder("INBOX");
         serverFolder.open(javax.mail.Folder.READ_ONLY);
-        var newMessages = Arrays.stream(serverFolder.getMessages())
+
+        var newMessages = Arrays.asList(serverFolder.getMessages())
+                .stream()
                 .flatMap(message -> {
                     var resOpt = Optional.empty();
                     try {
@@ -180,19 +182,18 @@ public class MailClientServiceImpl implements MailClientService {
                     message.setAttachments(attachments);
                     return message;
                 })
-                .collect(Collectors.toList());
-
-        newMessages = newMessages.stream()
                 .filter(message -> folder.getMessages()
-                        .stream().noneMatch(m->m.getMessageUid().equals(message.getMessageUid()))
+                        .stream().noneMatch(m -> m.getMessageUid().equals(message.getMessageUid()))
                 )
                 .collect(Collectors.toList());
+
         newMessages = messageRepository.saveAll(newMessages);
         var attachments = newMessages.stream().map(Message::getAttachments).flatMap(Collection::stream).collect(Collectors.toList());
         attachmentRepository.saveAll(attachments);
         newMessages = messageRepository.findAllById(newMessages.stream().map(Identifiable::getId).collect(Collectors.toSet()));
 
-        if(!indexingService.indexMessage(newMessages.toArray(Message[]::new))) log.error("Indexing unsuccessful");
+        if (!indexingService.indexMessage(newMessages.toArray(Message[]::new))) log.error("Indexing unsuccessful");
+
         folder.getMessages().addAll(newMessages);
         return folder;
     }

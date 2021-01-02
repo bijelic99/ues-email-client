@@ -8,10 +8,7 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
-import java.util.List;
-import java.util.Set;
 
 @Log4j2
 @Service
@@ -22,9 +19,8 @@ public class IndexingServiceImpl implements IndexingService {
 
     @Override
     public Boolean indexMessage(Message... messages) {
-        List<com.ftn.ues.email_client.dao.elastic_search.Message> esMessages = null;
         try {
-            esMessages = DirectMappingConverter.toMapping(Arrays.asList(messages), Message.class, com.ftn.ues.email_client.dao.elastic_search.Message.class);
+            var esMessages = DirectMappingConverter.toMapping(Arrays.asList(messages), Message.class, com.ftn.ues.email_client.dao.elastic_search.Message.class);
             messageESRepository.saveAll(esMessages);
             return true;
         } catch (Exception e) {

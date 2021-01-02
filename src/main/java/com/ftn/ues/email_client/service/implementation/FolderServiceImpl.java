@@ -31,6 +31,13 @@ public class FolderServiceImpl implements FolderService {
     public Folder refreshFolder(Long id) throws MessagingException {
         var folder = folderRepository.findById(id).orElseThrow();
         folder = mailClientService.refreshFolder(folder);
+        folder = executeRules(folder);
         return folderRepository.save(folder);
+    }
+
+    @Override
+    public Folder executeRules(Folder folder) {
+        // TODO implement
+        return folder;
     }
 }

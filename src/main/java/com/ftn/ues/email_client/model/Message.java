@@ -35,7 +35,8 @@ public class Message extends Identifiable{
     @Column
     private String bcc;
 
-    @Column(name = "date_time", nullable = false) @Type(type="org.jadira.usertype.dateandtime.joda.PersistentDateTime")
+    @Column(name = "date_time", nullable = false)
+    @Type(type="org.jadira.usertype.dateandtime.joda.PersistentDateTime")
     private DateTime dateTime;
 
     @NonNull
