@@ -30,7 +30,7 @@ public class FolderController {
     }
 
     @GetMapping("/{id}/refresh")
-    public Folder refresh(@PathVariable("id") Long id) throws MessagingException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
+    public Folder refresh(@PathVariable("id") Long id) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, MessagingException {
         return DirectMappingConverter.toMapping(folderService.refreshFolder(id), com.ftn.ues.email_client.model.Folder.class, Folder.class);
     }
 

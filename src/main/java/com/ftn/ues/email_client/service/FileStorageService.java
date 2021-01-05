@@ -1,5 +1,6 @@
 package com.ftn.ues.email_client.service;
 
+import com.ftn.ues.email_client.model.Attachment;
 import com.ftn.ues.email_client.util.JavaxMailMessageToMessageConverter;
 import io.minio.errors.*;
 
@@ -7,6 +8,7 @@ import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -27,5 +29,7 @@ public interface FileStorageService {
     Boolean deleteContactPhoto(String filename);
 
     Map<String, Boolean> deleteContactPhoto(String... filenames);
+
+    List<JavaxMailMessageToMessageConverter.AttachmentDataWrapper> getAttachments(Collection<Attachment> attachments);
 
 }

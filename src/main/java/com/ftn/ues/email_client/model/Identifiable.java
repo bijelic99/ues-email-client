@@ -1,5 +1,6 @@
 package com.ftn.ues.email_client.model;
 
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
@@ -16,6 +17,10 @@ public abstract class Identifiable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", unique = true, nullable = false)
     protected Long id;
+
+    @Builder.Default
+    @Column(name = "id", nullable = false)
+    protected Boolean deleted = false;
 
     @Override
     public boolean equals(Object o) {

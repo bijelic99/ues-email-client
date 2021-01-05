@@ -2,6 +2,7 @@ package com.ftn.ues.email_client.dao.rest;
 
 import com.ftn.ues.email_client.dao.DirectMapping;
 import com.ftn.ues.email_client.model.User;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -16,6 +17,7 @@ public class Tag extends DirectMapping<com.ftn.ues.email_client.model.Tag> {
         id = tag.getId();
         name = tag.getName();
         user = tag.getUser().getId();
+        deleted = tag.getDeleted();
     }
 
     @NonNull
@@ -27,6 +29,9 @@ public class Tag extends DirectMapping<com.ftn.ues.email_client.model.Tag> {
     @NonNull
     private Long user;
 
+    @Builder.Default
+    private Boolean deleted = false;
+
     @Override
     public com.ftn.ues.email_client.model.Tag getModelObject() {
         var user = new User();
@@ -35,6 +40,7 @@ public class Tag extends DirectMapping<com.ftn.ues.email_client.model.Tag> {
                 .id(id)
                 .name(name)
                 .user(user)
+                .deleted(deleted)
                 .build();
     }
 }

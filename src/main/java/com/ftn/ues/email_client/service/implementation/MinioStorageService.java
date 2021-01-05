@@ -1,8 +1,10 @@
 package com.ftn.ues.email_client.service.implementation;
 
 import com.ftn.ues.email_client.configuration.ApplicationConfiguration;
+import com.ftn.ues.email_client.model.Attachment;
 import com.ftn.ues.email_client.service.FileStorageService;
 import com.ftn.ues.email_client.util.JavaxMailMessageToMessageConverter;
+import io.minio.GetObjectArgs;
 import io.minio.MinioClient;
 import io.minio.UploadObjectArgs;
 import io.minio.errors.*;
@@ -10,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -94,5 +97,35 @@ public class MinioStorageService implements FileStorageService {
     @Override
     public Map<String, Boolean> deleteContactPhoto(String... filenames) {
         return null;
+    }
+
+    @Override
+    public List<JavaxMailMessageToMessageConverter.AttachmentDataWrapper> getAttachments(Collection<Attachment> attachments) {
+        return attachments.stream().flatMap(attachment -> {
+            var returnOpt = Optional.empty();
+            try{
+                var objectArgs = GetObjectArgs.builder()
+                        .bucket(configuration.getMinioAttachmentsBucketName())
+                        .object(attachment.getName())
+                        .build();
+                byte[] data;
+                try (var res = minioClient.getObject(objectArgs)){
+                    try (var outStr = new ByteArrayOutputStream()) {
+                        res.transferTo(outStr);
+                        data = outStr.toByteArray();
+                    }
+                }
+
+                returnOpt = Optional.of(new JavaxMailMessageToMessageConverter.AttachmentDataWrapper(attachment.getName(), attachment.getMimeType(), data));
+
+
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+            }
+
+            return returnOpt.stream().map(o -> (JavaxMailMessageToMessageConverter.AttachmentDataWrapper) o);
+
+        }).collect(Collectors.toList());
     }
 }

@@ -32,6 +32,7 @@ public class Folder extends DirectMapping<com.ftn.ues.email_client.model.Folder>
         messages = folder.getMessages().stream().map(Identifiable::getId).collect(Collectors.toSet());
         rules = folder.getRules().stream().map(Identifiable::getId).collect(Collectors.toSet());
         account = folder.getAccount().getId();
+        deleted = folder.getDeleted();
     }
 
     @NonNull
@@ -53,6 +54,9 @@ public class Folder extends DirectMapping<com.ftn.ues.email_client.model.Folder>
     private Set<Long> rules = new HashSet<>();
 
     private Long account;
+
+    @Builder.Default
+    private Boolean deleted = false;
 
     @Override
     public com.ftn.ues.email_client.model.Folder getModelObject() {
@@ -80,6 +84,7 @@ public class Folder extends DirectMapping<com.ftn.ues.email_client.model.Folder>
                     return r;
                 }).collect(Collectors.toSet()))
                 .account(acc)
+                .deleted(deleted)
                 .build();
     }
 }

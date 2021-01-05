@@ -5,6 +5,7 @@ import com.ftn.ues.email_client.model.Identifiable;
 import com.ftn.ues.email_client.model.Photo;
 import com.ftn.ues.email_client.model.User;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.SuperBuilder;
 import org.springframework.data.annotation.Id;
@@ -33,6 +34,9 @@ public class Contact extends DirectMapping<com.ftn.ues.email_client.model.Contac
     private Set<Long> photos;
     private Long user;
 
+    @Builder.Default
+    private Boolean deleted = false;
+
     public Contact(com.ftn.ues.email_client.model.Contact object) {
         super(object);
         id = object.getId();
@@ -43,6 +47,7 @@ public class Contact extends DirectMapping<com.ftn.ues.email_client.model.Contac
         note = object.getNote();
         photos = object.getPhotos().stream().map(Identifiable::getId).collect(Collectors.toSet());
         user = object.getUser().getId();
+        deleted = object.getDeleted();
     }
 
     @Override
@@ -58,6 +63,7 @@ public class Contact extends DirectMapping<com.ftn.ues.email_client.model.Contac
                         .map(x -> Photo.builder().id(x).build()).collect(Collectors.toSet())
                 )
                 .user(User.builder().id(user).build())
+                .deleted(deleted)
                 .build();
     }
 }

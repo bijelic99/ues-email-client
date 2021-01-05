@@ -28,6 +28,7 @@ public class User extends DirectMapping<com.ftn.ues.email_client.model.User> {
         userTags = user.getUserTags().stream().map(Identifiable::getId).collect(Collectors.toSet());
         userAccounts = user.getUserAccounts().stream().map(Identifiable::getId).collect(Collectors.toSet());
         userContacts = user.getUserContacts().stream().map(Identifiable::getId).collect(Collectors.toSet());
+        deleted = user.getDeleted();
     }
 
     @NonNull
@@ -52,6 +53,9 @@ public class User extends DirectMapping<com.ftn.ues.email_client.model.User> {
     @Builder.Default
     private Set<Long> userContacts = new HashSet<>();
 
+    @Builder.Default
+    private Boolean deleted = false;
+
     @Override
     public com.ftn.ues.email_client.model.User getModelObject() {
         return com.ftn.ues.email_client.model.User.builder()
@@ -75,6 +79,7 @@ public class User extends DirectMapping<com.ftn.ues.email_client.model.User> {
                     c.setId(contact);
                     return c;
                 }).collect(Collectors.toSet()))
+                .deleted(deleted)
                 .build();
 
     }

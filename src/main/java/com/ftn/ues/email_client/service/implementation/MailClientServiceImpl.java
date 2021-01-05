@@ -12,11 +12,18 @@ import com.ftn.ues.email_client.util.JavaxMailMessageToMessageConverter;
 import com.sun.mail.pop3.POP3Folder;
 import com.sun.mail.pop3.POP3Store;
 import lombok.extern.log4j.Log4j2;
+import org.joda.time.DateTime;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 
+import javax.activation.DataHandler;
+import javax.activation.DataSource;
 import javax.mail.*;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
+import javax.mail.util.ByteArrayDataSource;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -127,6 +134,59 @@ public class MailClientServiceImpl implements MailClientService {
                 return null;
             }
         }
+    }
+
+    @Override
+    public Message sendMessage(Message message) throws MessagingException {
+        var account = message.getAccount();
+        var session = getSession(account);
+        var mimeMessage = new MimeMessage(session);
+
+        mimeMessage.setFrom(account.getMailAddress());
+
+        mimeMessage.setRecipients(javax.mail.Message.RecipientType.TO, message.getTo());
+        mimeMessage.setRecipients(javax.mail.Message.RecipientType.CC, message.getCc());
+        mimeMessage.setRecipients(javax.mail.Message.RecipientType.BCC, message.getBcc());
+
+        mimeMessage.setSubject(message.getSubject());
+        var content = new MimeMultipart();
+        var textPart = new MimeBodyPart();
+        textPart.setText(message.getContent(), "utf-8");
+
+        content.addBodyPart(textPart);
+
+         fileStorageService.getAttachments(message.getAttachments()).stream()
+                .flatMap(attachmentData -> {
+                    var returnOpt = Optional.empty();
+                    try {
+                        var attMpart = new MimeBodyPart();
+                        attMpart.setFileName(attachmentData.getFilename());
+                        DataSource source = new ByteArrayDataSource(attachmentData.getData(), attachmentData.getMimeType());
+                        attMpart.setDataHandler(new DataHandler(source));
+                        returnOpt = Optional.of(attMpart);
+                    }
+                    catch (Exception e){
+                        e.printStackTrace();
+                    }
+
+                    return returnOpt.stream().map(o -> (MimeBodyPart) o);
+                }).forEach(mimeBodyPart -> {
+                    try {
+                        content.addBodyPart(mimeBodyPart);
+                    }
+                    catch (Exception e){
+                        e.printStackTrace();
+                    }
+                });
+         var currentDate = new Date();
+         mimeMessage.setSentDate(currentDate);
+         message.setDateTime(new DateTime(currentDate.getTime()));
+
+         mimeMessage.setContent(content);
+
+         Transport.send(mimeMessage);
+
+        return message;
     }
 
     private Folder refreshPop3Folder(Folder folder) throws MessagingException {

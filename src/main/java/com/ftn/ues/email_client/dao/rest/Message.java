@@ -34,6 +34,7 @@ public class Message extends DirectMapping<com.ftn.ues.email_client.model.Messag
         tags = message.getTags().stream().map(com.ftn.ues.email_client.dao.rest.Tag::new).collect(Collectors.toSet());
         parentFolder = message.getParentFolder() != null ? message.getParentFolder().getId() : null;
         account = message.getAccount().getId();
+        deleted = message.getDeleted();
     }
 
     @NonNull
@@ -72,6 +73,9 @@ public class Message extends DirectMapping<com.ftn.ues.email_client.model.Messag
     @NonNull
     private Long account;
 
+    @Builder.Default
+    private Boolean deleted = false;
+
     @Override
     public com.ftn.ues.email_client.model.Message getModelObject() {
         var parentFldr = new Folder();
@@ -92,6 +96,7 @@ public class Message extends DirectMapping<com.ftn.ues.email_client.model.Messag
                 .tags(tags.stream().map(Tag::getModelObject).collect(Collectors.toSet()))
                 .parentFolder(parentFldr)
                 .account(acc)
+                .deleted(deleted)
                 .build();
     }
 }

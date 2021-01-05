@@ -25,6 +25,7 @@ public class Contact extends DirectMapping<com.ftn.ues.email_client.model.Contac
         email = contact.getEmail();
         note = contact.getNote();
         photos = contact.getPhotos().stream().map(Photo::new).collect(Collectors.toSet());
+        deleted = contact.getDeleted();
     }
 
     @NonNull
@@ -49,6 +50,9 @@ public class Contact extends DirectMapping<com.ftn.ues.email_client.model.Contac
     @NonNull
     private Long user;
 
+    @Builder.Default
+    private Boolean deleted = false;
+
     @Override
     public com.ftn.ues.email_client.model.Contact getModelObject() {
         var usr = new User();
@@ -62,6 +66,7 @@ public class Contact extends DirectMapping<com.ftn.ues.email_client.model.Contac
                 .note(note)
                 .photos(photos.stream().map(Photo::getModelObject).collect(Collectors.toSet()))
                 .user(usr)
+                .deleted(deleted)
                 .build();
     }
 }

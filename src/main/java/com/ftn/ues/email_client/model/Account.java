@@ -45,6 +45,10 @@ public class Account extends Identifiable {
     private String password;
 
     @NonNull
+    @Column(nullable = false)
+    private String mailAddress;
+
+    @NonNull
     @Column(name = "display_name", nullable = false)
     private String displayName;
 

@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.ftn.ues.email_client.dao.DirectMapping;
 import com.ftn.ues.email_client.model.Account;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.Type;
@@ -56,6 +57,9 @@ public class Message extends DirectMapping<com.ftn.ues.email_client.model.Messag
 
     private Long account;
 
+    @Builder.Default
+    private Boolean deleted = false;
+
     public Message(com.ftn.ues.email_client.model.Message object) {
         super(object);
         id = object.getId();
@@ -70,6 +74,7 @@ public class Message extends DirectMapping<com.ftn.ues.email_client.model.Messag
         Attachments = object.getAttachments().stream().map(Attachment::new).collect(Collectors.toSet());
         Tags = object.getTags().stream().map(Tag::new).collect(Collectors.toSet());
         account = object.getAccount().getId();
+        deleted = object.getDeleted();
     }
 
     @Override
@@ -87,6 +92,7 @@ public class Message extends DirectMapping<com.ftn.ues.email_client.model.Messag
                 .attachments(Attachments.stream().map(Attachment::getModelObject).collect(Collectors.toSet()))
                 .tags(Tags.stream().map(Tag::getModelObject).collect(Collectors.toSet()))
                 .account(Account.builder().id(account).build())
+                .deleted(deleted)
                 .build();
     }
 }

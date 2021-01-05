@@ -29,9 +29,11 @@ public class Account extends DirectMapping<com.ftn.ues.email_client.model.Accoun
         inServerPort = account.getInServerPort();
         username = account.getUsername();
         password = account.getPassword();
+        mailAddress = account.getMailAddress();
         displayName = account.getDisplayName();
         user = account.getUser().getId();
         folders = account.getFolders().stream().map(Identifiable::getId).collect(Collectors.toSet());
+        deleted = account.getDeleted();
     }
 
     @NonNull
@@ -59,6 +61,9 @@ public class Account extends DirectMapping<com.ftn.ues.email_client.model.Accoun
     private String password;
 
     @NonNull
+    private String mailAddress;
+
+    @NonNull
     private String displayName;
 
     @NonNull
@@ -67,6 +72,9 @@ public class Account extends DirectMapping<com.ftn.ues.email_client.model.Accoun
     @NonNull
     @Builder.Default
     private Set<Long> folders = new HashSet<>();
+
+    @Builder.Default
+    private Boolean deleted = false;
 
     @Override
     public com.ftn.ues.email_client.model.Account getModelObject() {
@@ -81,6 +89,7 @@ public class Account extends DirectMapping<com.ftn.ues.email_client.model.Accoun
                 .inServerPort(inServerPort)
                 .username(username)
                 .password(password)
+                .mailAddress(mailAddress)
                 .displayName(displayName)
                 .user(usr)
                 .folders(folders.stream().map(folder -> {
@@ -88,6 +97,7 @@ public class Account extends DirectMapping<com.ftn.ues.email_client.model.Accoun
                     f.setId(folder);
                     return f;
                 }).collect(Collectors.toSet()))
+                .deleted(deleted)
                 .build();
     }
 }

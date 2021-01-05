@@ -4,6 +4,7 @@ import com.ftn.ues.email_client.dao.DirectMapping;
 import com.ftn.ues.email_client.model.Folder;
 import com.ftn.ues.email_client.model.RuleCondition;
 import com.ftn.ues.email_client.model.RuleOperation;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.NonNull;
@@ -21,6 +22,7 @@ public class Rule extends DirectMapping<com.ftn.ues.email_client.model.Rule> {
         operation = rule.getOperation();
         destinationFolder = rule.getDestinationFolder() != null ?  rule.getDestinationFolder().getId() : null;
         folder = rule.getFolder().getId();
+        deleted = rule.getDeleted();
 
     }
 
@@ -41,6 +43,9 @@ public class Rule extends DirectMapping<com.ftn.ues.email_client.model.Rule> {
     @NonNull
     private Long folder;
 
+    @Builder.Default
+    private Boolean deleted = false;
+
     @Override
     public com.ftn.ues.email_client.model.Rule getModelObject() {
         var destFolder = new Folder();
@@ -54,6 +59,7 @@ public class Rule extends DirectMapping<com.ftn.ues.email_client.model.Rule> {
                 .operation(operation)
                 .destinationFolder(destFolder)
                 .folder(parentFolder)
+                .deleted(deleted)
                 .build();
     }
 }
