@@ -19,7 +19,7 @@ public abstract class Identifiable {
     protected Long id;
 
     @Builder.Default
-    @Column(name = "id", nullable = false)
+    @Column(name = "deleted", nullable = false)
     protected Boolean deleted = false;
 
     @Override

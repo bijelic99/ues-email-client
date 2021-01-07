@@ -2,8 +2,8 @@ package com.ftn.ues.email_client.service.implementation;
 
 import com.ftn.ues.email_client.configuration.ApplicationConfiguration;
 import com.ftn.ues.email_client.model.Attachment;
+import com.ftn.ues.email_client.model.StoredDataWrapper;
 import com.ftn.ues.email_client.service.FileStorageService;
-import com.ftn.ues.email_client.util.JavaxMailMessageToMessageConverter;
 import io.minio.GetObjectArgs;
 import io.minio.MinioClient;
 import io.minio.UploadObjectArgs;
@@ -34,30 +34,12 @@ public class MinioStorageService implements FileStorageService {
     MinioClient minioClient;
 
     @Override
-    public String addAttachment(JavaxMailMessageToMessageConverter.AttachmentDataWrapper attachment) throws IOException, ServerException, InsufficientDataException, InternalException, InvalidResponseException, InvalidKeyException, NoSuchAlgorithmException, XmlParserException, ErrorResponseException {
-        // TODO handle different extensions
-        var attachmentId = UUID.randomUUID().toString();
-        var extension = "";
-        var matcher = Pattern.compile("\\..*$").matcher(attachment.getFilename());
-        while (matcher.find()) {
-            extension = matcher.group();
-        }
-        var fileName = attachmentId + extension;
-        Path tempFile = Files.createTempFile(attachmentId, extension);
-        try (InputStream in = new ByteArrayInputStream(attachment.getData())) {
-            Files.copy(in, tempFile, StandardCopyOption.REPLACE_EXISTING);
-        }
-        UploadObjectArgs.Builder builder = UploadObjectArgs.builder()
-                .bucket(configuration.getMinioAttachmentsBucketName())
-                .object(fileName)
-                .filename(tempFile.toString());
-        minioClient.uploadObject(builder.build());
-
-        return fileName;
+    public String addAttachment(StoredDataWrapper attachment) throws IOException, ServerException, InsufficientDataException, InternalException, InvalidResponseException, InvalidKeyException, NoSuchAlgorithmException, XmlParserException, ErrorResponseException {
+        return addObjectToStorage(attachment, configuration.getMinioAttachmentsBucketName());
     }
 
     @Override
-    public Set<String> addAttachment(Collection<JavaxMailMessageToMessageConverter.AttachmentDataWrapper> attachments) {
+    public Set<String> addAttachment(Collection<StoredDataWrapper> attachments) {
         return attachments.stream().flatMap(attachment -> {
             var returnOpt = Optional.empty();
             try {
@@ -70,37 +52,33 @@ public class MinioStorageService implements FileStorageService {
     }
 
     @Override
-    public Boolean deleteAttachment(String filename) {
-        return null;
+    public String addContactPhoto(StoredDataWrapper contact) throws IOException, InvalidKeyException, InvalidResponseException, InsufficientDataException, NoSuchAlgorithmException, ServerException, ErrorResponseException, XmlParserException, InternalException {
+        return addObjectToStorage(contact, configuration.getMinioContactPhotosBucketName());
+    }
+
+    public String addObjectToStorage(StoredDataWrapper data, String bucketName) throws IOException, ServerException, InsufficientDataException, InternalException, InvalidResponseException, InvalidKeyException, NoSuchAlgorithmException, XmlParserException, ErrorResponseException {
+        var dataId = UUID.randomUUID().toString();
+        var extension = "";
+        var matcher = Pattern.compile("\\..*$").matcher(data.getFilename());
+        while (matcher.find()) {
+            extension = matcher.group();
+        }
+        var fileName = dataId + extension;
+        Path tempFile = Files.createTempFile(dataId, extension);
+        try (InputStream in = new ByteArrayInputStream(data.getData())) {
+            Files.copy(in, tempFile, StandardCopyOption.REPLACE_EXISTING);
+        }
+        UploadObjectArgs.Builder builder = UploadObjectArgs.builder()
+                .bucket(bucketName)
+                .object(fileName)
+                .filename(tempFile.toString());
+        minioClient.uploadObject(builder.build());
+
+        return fileName;
     }
 
     @Override
-    public Map<String, Boolean> deleteAttachment(String... filenames) {
-        return null;
-    }
-
-    @Override
-    public String addContactPhoto(JavaxMailMessageToMessageConverter.AttachmentDataWrapper attachment) {
-        return null;
-    }
-
-    @Override
-    public Set<String> addContactPhoto(JavaxMailMessageToMessageConverter.AttachmentDataWrapper... attachments) {
-        return null;
-    }
-
-    @Override
-    public Boolean deleteContactPhoto(String filename) {
-        return null;
-    }
-
-    @Override
-    public Map<String, Boolean> deleteContactPhoto(String... filenames) {
-        return null;
-    }
-
-    @Override
-    public List<JavaxMailMessageToMessageConverter.AttachmentDataWrapper> getAttachments(Collection<Attachment> attachments) {
+    public List<StoredDataWrapper> getAttachments(Collection<Attachment> attachments) {
         return attachments.stream().flatMap(attachment -> {
             var returnOpt = Optional.empty();
             try{
@@ -116,7 +94,7 @@ public class MinioStorageService implements FileStorageService {
                     }
                 }
 
-                returnOpt = Optional.of(new JavaxMailMessageToMessageConverter.AttachmentDataWrapper(attachment.getName(), attachment.getMimeType(), data));
+                returnOpt = Optional.of(new StoredDataWrapper(attachment.getName(), attachment.getMimeType(), data));
 
 
             }
@@ -124,7 +102,7 @@ public class MinioStorageService implements FileStorageService {
                 e.printStackTrace();
             }
 
-            return returnOpt.stream().map(o -> (JavaxMailMessageToMessageConverter.AttachmentDataWrapper) o);
+            return returnOpt.stream().map(o -> (StoredDataWrapper) o);
 
         }).collect(Collectors.toList());
     }

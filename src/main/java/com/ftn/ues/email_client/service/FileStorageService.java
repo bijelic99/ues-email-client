@@ -1,7 +1,7 @@
 package com.ftn.ues.email_client.service;
 
 import com.ftn.ues.email_client.model.Attachment;
-import com.ftn.ues.email_client.util.JavaxMailMessageToMessageConverter;
+import com.ftn.ues.email_client.model.StoredDataWrapper;
 import io.minio.errors.*;
 
 import java.io.IOException;
@@ -14,22 +14,12 @@ import java.util.Set;
 
 public interface FileStorageService {
 
-    String addAttachment(JavaxMailMessageToMessageConverter.AttachmentDataWrapper attachment) throws IOException, ServerException, InsufficientDataException, InternalException, InvalidResponseException, InvalidKeyException, NoSuchAlgorithmException, XmlParserException, ErrorResponseException;
+    String addAttachment(StoredDataWrapper attachment) throws IOException, ServerException, InsufficientDataException, InternalException, InvalidResponseException, InvalidKeyException, NoSuchAlgorithmException, XmlParserException, ErrorResponseException;
 
-    Set<String> addAttachment(Collection<JavaxMailMessageToMessageConverter.AttachmentDataWrapper> attachments);
+    Set<String> addAttachment(Collection<StoredDataWrapper> attachments);
 
-    Boolean deleteAttachment(String filename);
+    String addContactPhoto(StoredDataWrapper contact) throws IOException, InvalidKeyException, InvalidResponseException, InsufficientDataException, NoSuchAlgorithmException, ServerException, ErrorResponseException, XmlParserException, InternalException;
 
-    Map<String, Boolean> deleteAttachment(String... filenames);
-
-    String addContactPhoto(JavaxMailMessageToMessageConverter.AttachmentDataWrapper attachment);
-
-    Set<String> addContactPhoto(JavaxMailMessageToMessageConverter.AttachmentDataWrapper... attachments);
-
-    Boolean deleteContactPhoto(String filename);
-
-    Map<String, Boolean> deleteContactPhoto(String... filenames);
-
-    List<JavaxMailMessageToMessageConverter.AttachmentDataWrapper> getAttachments(Collection<Attachment> attachments);
+    List<StoredDataWrapper> getAttachments(Collection<Attachment> attachments);
 
 }

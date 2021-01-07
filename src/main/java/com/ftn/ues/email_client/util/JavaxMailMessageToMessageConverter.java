@@ -1,5 +1,6 @@
 package com.ftn.ues.email_client.util;
 
+import com.ftn.ues.email_client.model.StoredDataWrapper;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import org.joda.time.DateTime;
@@ -41,8 +42,8 @@ public interface JavaxMailMessageToMessageConverter {
                 .map(o -> (String) o)
                 .collect(Collectors.joining("\n"));
         var attachments = contents.stream()
-                .filter(o -> o instanceof AttachmentDataWrapper)
-                .map(o -> (AttachmentDataWrapper) o)
+                .filter(o -> o instanceof StoredDataWrapper)
+                .map(o -> (StoredDataWrapper) o)
                 .collect(Collectors.toList());
 
         return new ParsedMessage(id, from, to, cc, bcc, dateTime, subject, content, attachments);
@@ -65,21 +66,13 @@ public interface JavaxMailMessageToMessageConverter {
         return content;
     }
 
-    private static AttachmentDataWrapper parseAttachment(InputStream inputStream, String fileName, String contentType) throws IOException {
+    private static StoredDataWrapper parseAttachment(InputStream inputStream, String fileName, String contentType) throws IOException {
         try (inputStream; ByteArrayOutputStream outputStream = new ByteArrayOutputStream()) {
             inputStream.transferTo(outputStream);
             outputStream.close();
             var attachmentType = Arrays.stream(contentType.split(";")).findFirst().orElseThrow();
-            return new AttachmentDataWrapper(fileName, attachmentType, outputStream.toByteArray());
+            return new StoredDataWrapper(fileName, attachmentType, outputStream.toByteArray());
         }
-    }
-
-    @AllArgsConstructor
-    @Getter
-    class AttachmentDataWrapper {
-        private final String filename;
-        private final String mimeType;
-        private final byte[] data;
     }
 
     @AllArgsConstructor
@@ -93,6 +86,6 @@ public interface JavaxMailMessageToMessageConverter {
         private final DateTime dateTime;
         private final String subject;
         private final String content;
-        private final List<AttachmentDataWrapper> attachments;
+        private final List<StoredDataWrapper> attachments;
     }
 }
