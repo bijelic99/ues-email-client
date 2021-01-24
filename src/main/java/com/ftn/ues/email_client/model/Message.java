@@ -53,7 +53,7 @@ public class Message extends Identifiable{
     private Boolean unread;
 
     @Builder.Default
-    @OneToMany(mappedBy = "message", orphanRemoval = true)
+    @OneToMany(mappedBy = "message")
     private Set<Attachment> attachments = new HashSet<>();
 
     @Builder.Default

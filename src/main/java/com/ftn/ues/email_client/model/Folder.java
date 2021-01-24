@@ -35,10 +35,6 @@ public class Folder extends Identifiable {
     @OneToMany(mappedBy = "parentFolder", cascade = CascadeType.REMOVE)
     private Set<Message> messages = new HashSet<>();
 
-    @Builder.Default
-    @OneToMany(mappedBy = "folder", cascade = CascadeType.REMOVE)
-    private Set<Rule> rules = new HashSet<>();
-
     @ManyToOne
     private Account account;
 }

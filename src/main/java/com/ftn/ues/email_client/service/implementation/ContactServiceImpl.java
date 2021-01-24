@@ -2,10 +2,9 @@ package com.ftn.ues.email_client.service.implementation;
 
 import com.ftn.ues.email_client.model.Contact;
 import com.ftn.ues.email_client.model.Photo;
-import com.ftn.ues.email_client.model.StoredDataWrapper;
+import com.ftn.ues.email_client.model.AttachmentRaw;
 import com.ftn.ues.email_client.repository.database.ContactRepository;
 import com.ftn.ues.email_client.repository.database.PhotoRepository;
-import com.ftn.ues.email_client.repository.database.UserRepository;
 import com.ftn.ues.email_client.service.ContactService;
 import com.ftn.ues.email_client.service.FileStorageService;
 import io.minio.errors.*;
@@ -36,7 +35,7 @@ public class ContactServiceImpl implements ContactService {
         contact.setPhotos(new HashSet<>());
         var savedContact = contactRepository.save(contact);
         if(photo != null) {
-            var photoData = new StoredDataWrapper(photo.getOriginalFilename(), photo.getContentType(), photo.getBytes());
+            var photoData = new AttachmentRaw(photo.getOriginalFilename(), photo.getContentType(), photo.getBytes());
             var path = fileStorageService.addContactPhoto(photoData);
             var photoToAddToDb = Photo.builder()
                     .id(null)

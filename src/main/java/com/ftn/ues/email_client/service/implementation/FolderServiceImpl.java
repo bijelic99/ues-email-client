@@ -2,6 +2,7 @@ package com.ftn.ues.email_client.service.implementation;
 
 import com.ftn.ues.email_client.model.Account;
 import com.ftn.ues.email_client.model.Folder;
+import com.ftn.ues.email_client.model.Pop3IngestServiceParams;
 import com.ftn.ues.email_client.repository.database.FolderRepository;
 import com.ftn.ues.email_client.repository.database.MessageRepository;
 import com.ftn.ues.email_client.service.FolderService;
@@ -23,7 +24,7 @@ public class FolderServiceImpl implements FolderService {
     MailClientService mailClientService;
 
     @Autowired
-    MessageRepository messageRepository;
+    Pop3IngestService pop3IngestService;
 
     @Override
     public Set<Folder> fetchFolderStructure(Account account) throws MessagingException {
@@ -35,16 +36,9 @@ public class FolderServiceImpl implements FolderService {
     @Override
     public Folder refreshFolder(Long id) throws MessagingException {
         var folder = folderRepository.findById(id).orElseThrow();
-        folder = mailClientService.refreshFolder(folder);
-        folder = executeRules(folder.getId());
-        return folderRepository.save(folder);
-    }
-
-    @Override
-    public Folder executeRules(Long id) {
-        var folder = folderRepository.findById(id).orElseThrow();
-        var rules = folder.getRules();
-        // TODO implement
-        return folder;
+        pop3IngestService.ingestNewMail(new Pop3IngestServiceParams(folder.getAccount()));
+        folder = folderRepository.findById(id).orElseThrow();
+        //folder = mailClientService.refreshFolder(folder);
+        return folder;//folderRepository.save(folder);
     }
 }

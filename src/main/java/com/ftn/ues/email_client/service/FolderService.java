@@ -9,5 +9,4 @@ import java.util.Set;
 public interface FolderService {
     public Set<Folder> fetchFolderStructure(Account account) throws MessagingException;
     public Folder refreshFolder(Long id) throws MessagingException;
-    public Folder executeRules(Long id);
 }

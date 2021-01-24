@@ -60,4 +60,9 @@ public class Account extends Identifiable {
     @Builder.Default
     @OneToMany(mappedBy = "account", orphanRemoval = true)
     private Set<Folder> folders = new HashSet<>();
+
+    @NonNull
+    @Builder.Default
+    @OneToMany(mappedBy = "account", orphanRemoval = true)
+    private Set<Rule> accountRules = new HashSet<>();
 }

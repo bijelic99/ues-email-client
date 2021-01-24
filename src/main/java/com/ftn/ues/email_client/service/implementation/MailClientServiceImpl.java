@@ -155,36 +155,34 @@ public class MailClientServiceImpl implements MailClientService {
 
         content.addBodyPart(textPart);
 
-         fileStorageService.getAttachments(message.getAttachments()).stream()
+        fileStorageService.getAttachments(message.getAttachments()).stream()
                 .flatMap(attachmentData -> {
                     var returnOpt = Optional.empty();
                     try {
                         var attMpart = new MimeBodyPart();
-                        attMpart.setFileName(attachmentData.getFilename());
-                        DataSource source = new ByteArrayDataSource(attachmentData.getData(), attachmentData.getMimeType());
+                        attMpart.setFileName(attachmentData.getValue1().getFilename());
+                        DataSource source = new ByteArrayDataSource(attachmentData.getValue1().getData(), attachmentData.getValue1().getMimeType());
                         attMpart.setDataHandler(new DataHandler(source));
                         returnOpt = Optional.of(attMpart);
-                    }
-                    catch (Exception e){
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
 
                     return returnOpt.stream().map(o -> (MimeBodyPart) o);
                 }).forEach(mimeBodyPart -> {
-                    try {
-                        content.addBodyPart(mimeBodyPart);
-                    }
-                    catch (Exception e){
-                        e.printStackTrace();
-                    }
-                });
-         var currentDate = new Date();
-         mimeMessage.setSentDate(currentDate);
-         message.setDateTime(new DateTime(currentDate.getTime()));
+            try {
+                content.addBodyPart(mimeBodyPart);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+        var currentDate = new Date();
+        mimeMessage.setSentDate(currentDate);
+        message.setDateTime(new DateTime(currentDate.getTime()));
 
-         mimeMessage.setContent(content);
+        mimeMessage.setContent(content);
 
-         Transport.send(mimeMessage);
+        Transport.send(mimeMessage);
 
         return message;
     }
@@ -256,6 +254,24 @@ public class MailClientServiceImpl implements MailClientService {
 
         folder.getMessages().addAll(newMessages);
         return folder;
+    }
+
+    public Set<MessageRaw> getNewPop3Messages(Account account) throws MessagingException {
+        var store = (POP3Store) getStore(account);
+        store.connect();
+
+        POP3Folder serverFolder = (POP3Folder) store.getFolder("INBOX");
+        serverFolder.open(javax.mail.Folder.READ_ONLY);
+
+         return Arrays.stream(serverFolder.getMessages())
+                .map(message -> {
+                    try {
+                        return JavaxMailMessageToMessageConverter
+                                .convertToRawMessage(message, serverFolder.getUID(message));
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                }).collect(Collectors.toSet());
     }
 
     private Folder refreshImapFolder(Folder folder) {

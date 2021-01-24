@@ -3,6 +3,7 @@ package com.ftn.ues.email_client.service;
 import com.ftn.ues.email_client.model.Account;
 import com.ftn.ues.email_client.model.Folder;
 import com.ftn.ues.email_client.model.Message;
+import com.ftn.ues.email_client.model.MessageRaw;
 import org.apache.commons.mail.EmailException;
 
 import javax.mail.MessagingException;
@@ -19,4 +20,5 @@ public interface MailClientService {
     Set<Folder> fetchFolderStructure(Account account) throws MessagingException;
     Folder refreshFolder(Folder folder) throws MessagingException;
     Message sendMessage(Message message) throws MessagingException;
+    Set<MessageRaw> getNewPop3Messages(Account account) throws MessagingException;
 }

@@ -2,12 +2,14 @@ package com.ftn.ues.email_client.service.implementation;
 
 import com.ftn.ues.email_client.configuration.ApplicationConfiguration;
 import com.ftn.ues.email_client.model.Attachment;
-import com.ftn.ues.email_client.model.StoredDataWrapper;
+import com.ftn.ues.email_client.model.AttachmentRaw;
 import com.ftn.ues.email_client.service.FileStorageService;
 import io.minio.GetObjectArgs;
 import io.minio.MinioClient;
 import io.minio.UploadObjectArgs;
 import io.minio.errors.*;
+import org.aspectj.bridge.AbortException;
+import org.javatuples.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -34,12 +36,12 @@ public class MinioStorageService implements FileStorageService {
     MinioClient minioClient;
 
     @Override
-    public String addAttachment(StoredDataWrapper attachment) throws IOException, ServerException, InsufficientDataException, InternalException, InvalidResponseException, InvalidKeyException, NoSuchAlgorithmException, XmlParserException, ErrorResponseException {
+    public String addAttachment(AttachmentRaw attachment) throws IOException, ServerException, InsufficientDataException, InternalException, InvalidResponseException, InvalidKeyException, NoSuchAlgorithmException, XmlParserException, ErrorResponseException {
         return addObjectToStorage(attachment, configuration.getMinioAttachmentsBucketName());
     }
 
     @Override
-    public Set<String> addAttachment(Collection<StoredDataWrapper> attachments) {
+    public Set<String> addAttachment(Collection<AttachmentRaw> attachments) {
         return attachments.stream().flatMap(attachment -> {
             var returnOpt = Optional.empty();
             try {
@@ -52,11 +54,11 @@ public class MinioStorageService implements FileStorageService {
     }
 
     @Override
-    public String addContactPhoto(StoredDataWrapper contact) throws IOException, InvalidKeyException, InvalidResponseException, InsufficientDataException, NoSuchAlgorithmException, ServerException, ErrorResponseException, XmlParserException, InternalException {
+    public String addContactPhoto(AttachmentRaw contact) throws IOException, InvalidKeyException, InvalidResponseException, InsufficientDataException, NoSuchAlgorithmException, ServerException, ErrorResponseException, XmlParserException, InternalException {
         return addObjectToStorage(contact, configuration.getMinioContactPhotosBucketName());
     }
 
-    public String addObjectToStorage(StoredDataWrapper data, String bucketName) throws IOException, ServerException, InsufficientDataException, InternalException, InvalidResponseException, InvalidKeyException, NoSuchAlgorithmException, XmlParserException, ErrorResponseException {
+    public String addObjectToStorage(AttachmentRaw data, String bucketName) throws IOException, ServerException, InsufficientDataException, InternalException, InvalidResponseException, InvalidKeyException, NoSuchAlgorithmException, XmlParserException, ErrorResponseException {
         var dataId = UUID.randomUUID().toString();
         var extension = "";
         var matcher = Pattern.compile("\\..*$").matcher(data.getFilename());
@@ -78,13 +80,13 @@ public class MinioStorageService implements FileStorageService {
     }
 
     @Override
-    public List<StoredDataWrapper> getAttachments(Collection<Attachment> attachments) {
-        return attachments.stream().flatMap(attachment -> {
-            var returnOpt = Optional.empty();
+    public List<Pair<Attachment, AttachmentRaw>> getAttachments(Collection<Attachment> attachments) {
+        return attachments.stream().map(attachment -> {
+
             try{
                 var objectArgs = GetObjectArgs.builder()
                         .bucket(configuration.getMinioAttachmentsBucketName())
-                        .object(attachment.getName())
+                        .object(attachment.getPath())
                         .build();
                 byte[] data;
                 try (var res = minioClient.getObject(objectArgs)){
@@ -93,16 +95,12 @@ public class MinioStorageService implements FileStorageService {
                         data = outStr.toByteArray();
                     }
                 }
-
-                returnOpt = Optional.of(new StoredDataWrapper(attachment.getName(), attachment.getMimeType(), data));
-
-
+                return new Pair<>(attachment,
+                        new AttachmentRaw(attachment.getName(), attachment.getMimeType(), data));
             }
             catch (Exception e) {
-                e.printStackTrace();
+                throw new RuntimeException(e);
             }
-
-            return returnOpt.stream().map(o -> (StoredDataWrapper) o);
 
         }).collect(Collectors.toList());
     }

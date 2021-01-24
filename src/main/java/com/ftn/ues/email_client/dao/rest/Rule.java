@@ -21,7 +21,6 @@ public class Rule extends DirectMapping<com.ftn.ues.email_client.model.Rule> {
         value = rule.getValue();
         operation = rule.getOperation();
         destinationFolder = rule.getDestinationFolder() != null ?  rule.getDestinationFolder().getId() : null;
-        folder = rule.getFolder().getId();
         deleted = rule.getDeleted();
 
     }
@@ -40,9 +39,6 @@ public class Rule extends DirectMapping<com.ftn.ues.email_client.model.Rule> {
 
     private Long destinationFolder;
 
-    @NonNull
-    private Long folder;
-
     @Builder.Default
     private Boolean deleted = false;
 
@@ -50,15 +46,12 @@ public class Rule extends DirectMapping<com.ftn.ues.email_client.model.Rule> {
     public com.ftn.ues.email_client.model.Rule getModelObject() {
         var destFolder = new Folder();
         destFolder.setId(destinationFolder);
-        var parentFolder = new Folder();
-        parentFolder.setId(folder);
         return com.ftn.ues.email_client.model.Rule.builder()
                 .id(id)
                 .condition(condition)
                 .value(value)
                 .operation(operation)
                 .destinationFolder(destFolder)
-                .folder(parentFolder)
                 .deleted(deleted)
                 .build();
     }

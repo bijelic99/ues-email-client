@@ -34,5 +34,6 @@ public class Rule extends Identifiable {
 
     @NonNull
     @ManyToOne
-    private Folder folder;
+    @JoinColumn(name = "account")
+    private Account account;
 }

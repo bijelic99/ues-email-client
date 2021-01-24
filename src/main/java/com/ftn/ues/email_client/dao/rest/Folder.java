@@ -30,7 +30,6 @@ public class Folder extends DirectMapping<com.ftn.ues.email_client.model.Folder>
         children = folder.getChildren().stream().map(Identifiable::getId).collect(Collectors.toSet());
         parentFolder = folder.getParentFolder() != null ? folder.getParentFolder().getId() : null;
         messages = folder.getMessages().stream().map(Identifiable::getId).collect(Collectors.toSet());
-        rules = folder.getRules().stream().map(Identifiable::getId).collect(Collectors.toSet());
         account = folder.getAccount().getId();
         deleted = folder.getDeleted();
     }
@@ -77,11 +76,6 @@ public class Folder extends DirectMapping<com.ftn.ues.email_client.model.Folder>
                     var m = new Message();
                     m.setId(msg);
                     return m;
-                }).collect(Collectors.toSet()))
-                .rules(rules.stream().map(rule->{
-                    var r = new Rule();
-                    r.setId(rule);
-                    return r;
                 }).collect(Collectors.toSet()))
                 .account(acc)
                 .deleted(deleted)

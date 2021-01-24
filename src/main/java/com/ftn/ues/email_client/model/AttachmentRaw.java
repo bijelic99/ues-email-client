@@ -5,8 +5,7 @@ import lombok.Getter;
 
 @AllArgsConstructor
 @Getter
-public
-class StoredDataWrapper {
+public class AttachmentRaw {
     private final String filename;
     private final String mimeType;
     private final byte[] data;
