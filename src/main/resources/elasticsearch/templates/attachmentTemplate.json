@@ -1,0 +1,58 @@
+{
+  "version": 0,
+  "index_patterns": [
+    "attachment*"
+  ],
+  "settings": {
+    "number_of_shards": 2
+  },
+  "mappings": {
+    "_source": {
+      "enabled": true
+    },
+    "properties": {
+      "id": {
+        "type": "long"
+      },
+      "userId": {
+        "type": "long"
+      },
+      "path": {
+        "type": "keyword"
+      },
+      "mimeType": {
+        "type": "keyword"
+      },
+      "name": {
+        "type": "keyword"
+      },
+      "messageId": {
+        "type": "long"
+      },
+      "data": {
+        "type": "binary"
+      },
+      "metadata": {
+        "type": "nested",
+        "properties": {
+          "dateTime": {
+            "type": "date",
+            "format": "dd-MM-yyyy HH:mm:ss"
+          },
+          "contentType": {
+            "type": "keyword"
+          },
+          "language": {
+            "type": "keyword"
+          },
+          "content": {
+            "type": "keyword"
+          },
+          "contentLength": {
+            "type": "long"
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,17 +1,15 @@
 package com.ftn.ues.email_client.controller;
 
-import com.ftn.ues.email_client.dao.elastic_search.Attachment;
+import com.ftn.ues.email_client.client.ContactESClient;
+import com.ftn.ues.email_client.client.MessageESClient;
+import com.ftn.ues.email_client.client.TagESClient;
 import com.ftn.ues.email_client.dao.rest.User;
 import com.ftn.ues.email_client.repository.database.UserRepository;
-import com.ftn.ues.email_client.repository.elastic_search.AttachmentESRepository;
 import com.ftn.ues.email_client.service.UserService;
 import com.ftn.ues.email_client.util.DirectMappingConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @RestController
 @RequestMapping("api/user")
@@ -19,9 +17,6 @@ public class UserController {
 
     @Autowired
     UserService userService;
-
-    @Autowired
-    AttachmentESRepository attachmentESRepository;
 
     @PostMapping("/register")
     public ResponseEntity<Object> register(@RequestBody User user){

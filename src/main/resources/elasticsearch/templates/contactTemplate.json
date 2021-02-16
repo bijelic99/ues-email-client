@@ -1,0 +1,62 @@
+{
+  "version": 0,
+  "index_patterns": [
+    "contact*"
+  ],
+  "settings": {
+    "number_of_shards": 2
+  },
+  "mappings": {
+    "_source": {
+      "enabled": true
+    },
+    "properties": {
+      "id": {
+        "type": "long"
+      },
+      "firstName": {
+        "type": "text",
+        "analyzer": "serbian",
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        }
+      },
+      "lastName": {
+        "type": "text",
+        "analyzer": "serbian",
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        }
+      },
+      "displayName": {
+        "type": "text",
+        "analyzer": "serbian",
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        }
+      },
+      "email": {
+        "type": "keyword"
+      },
+      "note": {
+        "type": "text",
+        "analyzer": "serbian"
+      },
+      "photoIds": {
+        "type": "long"
+      },
+      "userId": {
+        "type": "long"
+      },
+      "deleted": {
+        "type": "boolean"
+      }
+    }
+  }
+}

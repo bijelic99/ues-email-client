@@ -6,5 +6,4 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Set;
 
 public interface IndexingService {
-    Boolean indexMessage(Message... messages);
 }

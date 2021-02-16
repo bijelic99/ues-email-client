@@ -10,5 +10,4 @@ import java.util.Set;
 public interface MessageService {
     Message sendMessage(Message message) throws MessagingException;
     Set<Message> saveMessages(Account account, Set<MessageRaw> rawMessages);
-    Set<com.ftn.ues.email_client.dao.elastic_search.Message> indexMessages(Set<Message> messagesToIndex);
 }

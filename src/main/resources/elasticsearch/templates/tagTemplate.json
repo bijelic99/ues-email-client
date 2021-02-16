@@ -1,0 +1,34 @@
+{
+  "version": 0,
+  "index_patterns": [
+    "tag*"
+  ],
+  "settings": {
+    "number_of_shards": 2
+  },
+  "mappings": {
+    "_source": {
+      "enabled": true
+    },
+    "properties": {
+      "id": {
+        "type": "long"
+      },
+      "name": {
+        "type": "text",
+        "analyzer": "serbian",
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        }
+      },
+      "userId": {
+        "type": "long"
+      },
+      "deleted": {
+        "type": "boolean"
+      }
+    }
+  }
+}

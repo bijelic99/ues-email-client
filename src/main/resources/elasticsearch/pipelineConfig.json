@@ -1,0 +1,13 @@
+{
+  "description": "To get attachment information",
+  "processors": [
+    {
+      "attachment": {
+        "indexed_chars": 10000,
+        "field": "attachments.data",
+        "target_field": "metadata",
+        "indexed_chars_field": "max_size"
+      }
+    }
+  ]
+}

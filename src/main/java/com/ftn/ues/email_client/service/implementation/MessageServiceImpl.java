@@ -4,7 +4,6 @@ import com.ftn.ues.email_client.model.Account;
 import com.ftn.ues.email_client.model.Message;
 import com.ftn.ues.email_client.model.MessageRaw;
 import com.ftn.ues.email_client.repository.database.MessageRepository;
-import com.ftn.ues.email_client.repository.elastic_search.MessageESRepository;
 import com.ftn.ues.email_client.service.AttachmentService;
 import com.ftn.ues.email_client.service.MailClientService;
 import com.ftn.ues.email_client.service.MessageService;
@@ -25,9 +24,6 @@ public class MessageServiceImpl implements MessageService {
 
     @Autowired
     AttachmentService attachmentService;
-
-    @Autowired
-    MessageESRepository messageESRepository;
 
     @Override
     public Message sendMessage(Message message) throws MessagingException {
@@ -59,17 +55,5 @@ public class MessageServiceImpl implements MessageService {
                     return message;
                 })
                 .collect(Collectors.toSet());
-    }
-
-    @Override
-    public Set<com.ftn.ues.email_client.dao.elastic_search.Message> indexMessages(Set<Message> messagesToIndex) {
-        return messagesToIndex.stream().map(message -> {
-            var esMsg = new com.ftn.ues.email_client.dao.elastic_search.Message(message);
-            esMsg = messageESRepository.save(esMsg);
-            var esAtts = attachmentService.indexAttachments(message.getAttachments());
-            esMsg.setAttachments(esAtts);
-            esMsg = messageESRepository.save(esMsg);
-            return esMsg;
-        }).collect(Collectors.toSet());
     }
 }

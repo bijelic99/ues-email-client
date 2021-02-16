@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import javax.mail.MessagingException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -30,8 +31,9 @@ public class Pop3IngestService implements IngestService<Pop3IngestServiceParams>
     @Override
     public void ingestNewMail(Pop3IngestServiceParams params) throws MessagingException {
         var newMail = getNewMail(params.getAccount());
-        var indexedMessages = messageService.indexMessages(newMail);
-        var newMessageIds = indexedMessages.stream().map(message -> message.getId()).collect(Collectors.toSet());
+        // TODO fix
+        //var indexedMessages = messageService.indexMessages(newMail);
+        var newMessageIds = new HashSet<Long>();//indexedMessages.stream().map(message -> message.getId()).collect(Collectors.toSet());
         ruleService.executeRules(params.getAccount(), newMessageIds);
     }
 
@@ -41,7 +43,8 @@ public class Pop3IngestService implements IngestService<Pop3IngestServiceParams>
     }
 
     private Set<Long> indexNewMail(Account account, Set<Message> messages) {
-        var indexedMessages = messageService.indexMessages(messages);
+        // TODO fix
+        //var indexedMessages = messageService.indexMessages(messages);
         return null;
     }
 }

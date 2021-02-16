@@ -250,7 +250,8 @@ public class MailClientServiceImpl implements MailClientService {
         attachmentRepository.saveAll(attachments);
         newMessages = messageRepository.findAllById(newMessages.stream().map(Identifiable::getId).collect(Collectors.toSet()));
 
-        if (!indexingService.indexMessage(newMessages.toArray(Message[]::new))) log.error("Indexing unsuccessful");
+        // TODO fix
+        //if (!indexingService.indexMessage(newMessages.toArray(Message[]::new))) log.error("Indexing unsuccessful");
 
         folder.getMessages().addAll(newMessages);
         return folder;
