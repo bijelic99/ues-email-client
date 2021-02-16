@@ -47,9 +47,6 @@
           "id": {
             "type": "long"
           },
-          "userId": {
-            "type": "long"
-          },
           "path": {
             "type": "keyword"
           },

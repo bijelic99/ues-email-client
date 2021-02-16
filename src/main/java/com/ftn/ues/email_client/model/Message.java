@@ -8,6 +8,7 @@ import org.joda.time.DateTime;
 import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Getter
 @Setter
@@ -67,4 +68,31 @@ public class Message extends Identifiable{
     @NonNull
     @ManyToOne
     private Account account;
+
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        return Message.builder()
+                .id(this.id)
+                .messageUid(this.messageUid)
+                .from(this.from)
+                .to(this.to)
+                .cc(this.cc)
+                .bcc(this.bcc)
+                .dateTime(this.dateTime)
+                .subject(this.subject)
+                .content(this.content)
+                .unread(this.unread)
+                .attachments(this.attachments.stream().map(attachment -> {
+                    try {
+                        return (Attachment)attachment.clone();
+                    }
+                    catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                }).collect(Collectors.toSet()))
+                .tags(this.tags)
+                .parentFolder(this.parentFolder)
+                .account(this.account)
+                .build();
+    }
 }

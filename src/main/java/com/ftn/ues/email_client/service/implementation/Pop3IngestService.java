@@ -31,9 +31,7 @@ public class Pop3IngestService implements IngestService<Pop3IngestServiceParams>
     @Override
     public void ingestNewMail(Pop3IngestServiceParams params) throws MessagingException {
         var newMail = getNewMail(params.getAccount());
-        // TODO fix
-        //var indexedMessages = messageService.indexMessages(newMail);
-        var newMessageIds = new HashSet<Long>();//indexedMessages.stream().map(message -> message.getId()).collect(Collectors.toSet());
+        var newMessageIds = newMail.stream().map(Identifiable::getId).collect(Collectors.toSet());
         ruleService.executeRules(params.getAccount(), newMessageIds);
     }
 

@@ -18,5 +18,7 @@ class MessageESClient @Inject()(esConfig: ElasticsearchConfiguration,
     templateFilename = esConfig.messageIndexTemplateFileName,
     wsClient
   ) {
+  def indexMessage() = {
 
+  }
 }

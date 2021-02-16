@@ -6,6 +6,7 @@ import com.ftn.ues.email_client.model.MessageRaw;
 import com.ftn.ues.email_client.repository.database.MessageRepository;
 import com.ftn.ues.email_client.service.AttachmentService;
 import com.ftn.ues.email_client.service.MailClientService;
+import com.ftn.ues.email_client.service.MessageIndexService;
 import com.ftn.ues.email_client.service.MessageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,9 @@ public class MessageServiceImpl implements MessageService {
 
     @Autowired
     AttachmentService attachmentService;
+
+    @Autowired
+    MessageIndexService messageIndexService;
 
     @Override
     public Message sendMessage(Message message) throws MessagingException {
@@ -55,5 +59,10 @@ public class MessageServiceImpl implements MessageService {
                     return message;
                 })
                 .collect(Collectors.toSet());
+    }
+
+    @Override
+    public Set<com.ftn.ues.email_client.dao.elastic.Message> indexMessages(Set<Long> messageIds) {
+        return messageIndexService.index(messageIds);
     }
 }

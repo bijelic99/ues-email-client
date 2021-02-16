@@ -31,4 +31,14 @@ public class Attachment extends Identifiable {
     @NonNull
     @ManyToOne
     private Message message;
+
+    @Override
+    public Object clone() throws CloneNotSupportedException {
+        return Attachment.builder()
+                .id(this.id)
+                .path(this.path)
+                .mimeType(this.mimeType)
+                .name(this.name)
+                .message(this.message);
+    }
 }
