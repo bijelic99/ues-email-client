@@ -64,7 +64,13 @@ public class RuleServiceImpl implements RuleService {
             executeRule(account, rule, ruleHits);
             messages = ruleMisses;
         }
-
+        List<Message> leftOverMessages = messages;
+        account.getFolders().stream().filter(Folder::getIsMainInbox).findFirst().ifPresent(folder -> {
+            messageRepository.saveAll(leftOverMessages.stream().map(msg -> {
+                msg.setParentFolder(folder);
+                return msg;
+            }).collect(Collectors.toSet()));
+        });
     }
 
     private boolean fieldMatches(String field, String match) {

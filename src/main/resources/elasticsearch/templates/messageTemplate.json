@@ -14,6 +14,9 @@
       "id": {
         "type": "long"
       },
+      "userId": {
+        "type": "long"
+      },
       "from": {
         "type": "keyword"
       },
@@ -61,27 +64,6 @@
           },
           "data": {
             "type": "binary"
-          },
-          "metadata": {
-            "type": "nested",
-            "properties": {
-              "dateTime": {
-                "type": "date",
-                "format": "dd-MM-yyyy HH:mm:ss"
-              },
-              "contentType": {
-                "type": "keyword"
-              },
-              "language": {
-                "type": "keyword"
-              },
-              "content": {
-                "type": "keyword"
-              },
-              "contentLength": {
-                "type": "long"
-              }
-            }
           }
         }
       },

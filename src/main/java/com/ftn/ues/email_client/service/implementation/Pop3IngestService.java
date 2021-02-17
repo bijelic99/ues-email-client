@@ -33,16 +33,11 @@ public class Pop3IngestService implements IngestService<Pop3IngestServiceParams>
         var newMail = getNewMail(params.getAccount());
         var newMessageIds = newMail.stream().map(Identifiable::getId).collect(Collectors.toSet());
         ruleService.executeRules(params.getAccount(), newMessageIds);
+        messageService.indexMessages(newMessageIds);
     }
 
     private Set<Message> getNewMail(Account account) throws MessagingException {
         var newMail = mailClientService.getNewPop3Messages(account);
         return messageService.saveMessages(account, newMail);
-    }
-
-    private Set<Long> indexNewMail(Account account, Set<Message> messages) {
-        // TODO fix
-        //var indexedMessages = messageService.indexMessages(messages);
-        return null;
     }
 }

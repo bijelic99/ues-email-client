@@ -1,5 +1,7 @@
 package com.ftn.ues.email_client.dao.elastic
 
+import play.api.libs.json.{Json, OFormat}
+
 case class Contact(
                     id: Long,
                     firstName: String,
@@ -11,3 +13,7 @@ case class Contact(
                     userId: Long,
                     deleted: Boolean
                   )
+
+object Contact{
+  implicit val format: OFormat[Contact] = Json.format[Contact]
+}

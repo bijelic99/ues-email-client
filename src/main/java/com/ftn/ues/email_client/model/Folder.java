@@ -31,6 +31,8 @@ public class Folder extends Identifiable {
     @ManyToOne
     private Folder parentFolder;
 
+    private Boolean isMainInbox;
+
     @Builder.Default
     @OneToMany(mappedBy = "parentFolder", cascade = CascadeType.REMOVE)
     private Set<Message> messages = new HashSet<>();

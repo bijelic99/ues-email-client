@@ -2,11 +2,29 @@
   "description": "To get attachment information",
   "processors": [
     {
-      "attachment": {
-        "indexed_chars": 10000,
-        "field": "attachments.data",
-        "target_field": "metadata",
-        "indexed_chars_field": "max_size"
+      "foreach": {
+        "field": "attachments",
+        "processor": {
+          "attachment": {
+            "indexed_chars": 10000,
+            "field": "_ingest._value.data",
+            "target_field": "_ingest._value.metadata",
+            "indexed_chars_field": "max_size",
+            "properties": ["date", "language","content"],
+            "ignore_missing": true
+          }
+        }
+      }
+    },
+    {
+      "foreach": {
+        "field": "attachments",
+        "processor": {
+          "remove": {
+            "field": "_ingest._value.data",
+            "ignore_missing": true
+          }
+        }
       }
     }
   ]

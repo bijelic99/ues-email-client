@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import javax.mail.MessagingException;
+import java.util.Collection;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -62,7 +63,7 @@ public class MessageServiceImpl implements MessageService {
     }
 
     @Override
-    public Set<com.ftn.ues.email_client.dao.elastic.Message> indexMessages(Set<Long> messageIds) {
+    public Collection<com.ftn.ues.email_client.dao.elastic.Message> indexMessages(Set<Long> messageIds) {
         return messageIndexService.index(messageIds);
     }
 }

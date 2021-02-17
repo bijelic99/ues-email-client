@@ -1,16 +1,14 @@
 package com.ftn.ues.email_client.model;
 
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 import javax.persistence.*;
 import java.util.Objects;
 
-@Data
 @SuperBuilder
 @NoArgsConstructor
+@AllArgsConstructor
 @MappedSuperclass
 public abstract class Identifiable {
     @Id
@@ -28,5 +26,21 @@ public abstract class Identifiable {
         if (o == null || getClass() != o.getClass()) return false;
         Identifiable that = (Identifiable) o;
         return Objects.equals(getId(), that.getId());
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Boolean getDeleted() {
+        return deleted;
+    }
+
+    public void setDeleted(Boolean deleted) {
+        this.deleted = deleted;
     }
 }

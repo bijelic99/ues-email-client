@@ -113,6 +113,7 @@ public class MailClientServiceImpl implements MailClientService {
                 .children(new HashSet<>())
                 .messages(new HashSet<>())
                 .name(defaultFolder.getName())
+                .isMainInbox(true)
                 .build();
         return new HashSet<>(Collections.singletonList(newFolder));
     }
