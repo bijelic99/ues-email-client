@@ -1,5 +1,7 @@
 package com.ftn.ues.email_client.controller;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ftn.ues.email_client.client.ContactESClient;
 import com.ftn.ues.email_client.client.MessageESClient;
 import com.ftn.ues.email_client.client.TagESClient;
@@ -12,6 +14,7 @@ import com.ftn.ues.email_client.util.DirectMappingConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import scala.collection.immutable.Seq;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -49,8 +52,12 @@ public class UserController {
         }
     }
 
+    @Autowired
+    ObjectMapper objectMapper;
+
     @GetMapping("/{id}/messages")
-    public List<Message> getMessages(@RequestParam Map<String, String> params, @PathVariable("id") Long id){
-        return new ArrayList<Message>(messageIndexService.findMessages(id, params));
+    public Seq<Message> getMessages(@RequestParam Map<String, String> params, @PathVariable("id") Long id) {
+        return messageIndexService.findMessages(id, params);
     }
+
 }

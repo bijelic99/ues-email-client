@@ -12,10 +12,10 @@
     },
     "properties": {
       "id": {
-        "type": "long"
+        "type": "keyword"
       },
       "userId": {
-        "type": "long"
+        "type": "keyword"
       },
       "from": {
         "type": "keyword"
@@ -48,7 +48,7 @@
         "type": "nested",
         "properties": {
           "id": {
-            "type": "long"
+            "type": "keyword"
           },
           "path": {
             "type": "keyword"
@@ -60,7 +60,7 @@
             "type": "keyword"
           },
           "messageId": {
-            "type": "long"
+            "type": "keyword"
           },
           "data": {
             "type": "binary"
@@ -68,13 +68,13 @@
         }
       },
       "tags": {
-        "type": "long"
+        "type": "keyword"
       },
       "parentFolderId": {
-        "type": "long"
+        "type": "keyword"
       },
       "accountId": {
-        "type": "long"
+        "type": "keyword"
       },
       "deleted": {
         "type": "boolean"

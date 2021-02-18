@@ -8,8 +8,6 @@ import javax.persistence.Entity;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 
-@Getter
-@Setter
 @RequiredArgsConstructor
 @SuperBuilder
 @NoArgsConstructor
@@ -23,4 +21,20 @@ public class Photo extends Identifiable {
     @NonNull
     @ManyToOne
     private Contact contact;
+
+    public String getPath() {
+        return path;
+    }
+
+    public void setPath(String path) {
+        this.path = path;
+    }
+
+    public Contact getContact() {
+        return contact;
+    }
+
+    public void setContact(Contact contact) {
+        this.contact = contact;
+    }
 }

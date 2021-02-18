@@ -6,8 +6,6 @@ import lombok.experimental.SuperBuilder;
 
 import javax.persistence.*;
 
-@Getter
-@Setter
 @RequiredArgsConstructor
 @SuperBuilder
 @NoArgsConstructor
@@ -36,4 +34,44 @@ public class Rule extends Identifiable {
     @ManyToOne
     @JoinColumn(name = "account")
     private Account account;
+
+    public RuleCondition getCondition() {
+        return condition;
+    }
+
+    public void setCondition(RuleCondition condition) {
+        this.condition = condition;
+    }
+
+    public String getValue() {
+        return value;
+    }
+
+    public void setValue(String value) {
+        this.value = value;
+    }
+
+    public RuleOperation getOperation() {
+        return operation;
+    }
+
+    public void setOperation(RuleOperation operation) {
+        this.operation = operation;
+    }
+
+    public Folder getDestinationFolder() {
+        return destinationFolder;
+    }
+
+    public void setDestinationFolder(Folder destinationFolder) {
+        this.destinationFolder = destinationFolder;
+    }
+
+    public Account getAccount() {
+        return account;
+    }
+
+    public void setAccount(Account account) {
+        this.account = account;
+    }
 }

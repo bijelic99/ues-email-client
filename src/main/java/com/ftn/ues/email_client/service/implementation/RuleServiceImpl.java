@@ -65,7 +65,7 @@ public class RuleServiceImpl implements RuleService {
             messages = ruleMisses;
         }
         List<Message> leftOverMessages = messages;
-        account.getFolders().stream().filter(Folder::getIsMainInbox).findFirst().ifPresent(folder -> {
+        account.getFolders().stream().filter(Folder::getMainInbox).findFirst().ifPresent(folder -> {
             messageRepository.saveAll(leftOverMessages.stream().map(msg -> {
                 msg.setParentFolder(folder);
                 return msg;

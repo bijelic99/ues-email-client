@@ -1,6 +1,8 @@
 package com.ftn.ues.email_client.dao.elastic
 
+import org.joda.time.format.DateTimeFormat
 import play.api.libs.json.{Json, OFormat}
+
 
 case class Message(
                     id: Long,
@@ -25,6 +27,8 @@ case class Message(
 object Message {
   import scala.jdk.CollectionConverters._
 
+  private val dtf = DateTimeFormat.forPattern("dd-MM-yyyy HH:mm:ss")
+
   def apply(message: com.ftn.ues.email_client.model.Message, attachments: Seq[Attachment]): Message =
     Message(
       message.getId,
@@ -33,7 +37,7 @@ object Message {
       message.getTo,
       message.getCc,
       message.getBcc,
-      message.getDateTime.formatted("dd-MM-yyyy HH:mm:ss"),
+      dtf.print(message.getDateTime),
       message.getSubject,
       message.getContent,
       message.getUnread,
@@ -42,7 +46,7 @@ object Message {
       message.getParentFolder.getId,
       message.getAccount.getId,
       message.getDeleted,
-      message.getContent.substring(0, if(message.getContent.length < 256) message.getContent.length else 256),
+      message.getContent.substring(0, if (message.getContent.length < 256) message.getContent.length else 256),
       message.getContent
     )
 

@@ -7,8 +7,6 @@ import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Set;
 
-@Getter
-@Setter
 @RequiredArgsConstructor
 @SuperBuilder
 @NoArgsConstructor
@@ -39,4 +37,60 @@ public class Folder extends Identifiable {
 
     @ManyToOne
     private Account account;
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getFolderUrl() {
+        return folderUrl;
+    }
+
+    public void setFolderUrl(String folderUrl) {
+        this.folderUrl = folderUrl;
+    }
+
+    public Set<Folder> getChildren() {
+        return children;
+    }
+
+    public void setChildren(Set<Folder> children) {
+        this.children = children;
+    }
+
+    public Folder getParentFolder() {
+        return parentFolder;
+    }
+
+    public void setParentFolder(Folder parentFolder) {
+        this.parentFolder = parentFolder;
+    }
+
+    public Boolean getMainInbox() {
+        return isMainInbox;
+    }
+
+    public void setMainInbox(Boolean mainInbox) {
+        isMainInbox = mainInbox;
+    }
+
+    public Set<Message> getMessages() {
+        return messages;
+    }
+
+    public void setMessages(Set<Message> messages) {
+        this.messages = messages;
+    }
+
+    public Account getAccount() {
+        return account;
+    }
+
+    public void setAccount(Account account) {
+        this.account = account;
+    }
 }
