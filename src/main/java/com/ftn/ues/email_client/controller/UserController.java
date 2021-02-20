@@ -1,13 +1,8 @@
 package com.ftn.ues.email_client.controller;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.ftn.ues.email_client.client.ContactESClient;
-import com.ftn.ues.email_client.client.MessageESClient;
-import com.ftn.ues.email_client.client.TagESClient;
-import com.ftn.ues.email_client.dao.elastic.Message;
 import com.ftn.ues.email_client.dao.rest.User;
 import com.ftn.ues.email_client.repository.database.UserRepository;
+import com.ftn.ues.email_client.service.ContactIndexService;
 import com.ftn.ues.email_client.service.MessageIndexService;
 import com.ftn.ues.email_client.service.UserService;
 import com.ftn.ues.email_client.util.DirectMappingConverter;
@@ -16,8 +11,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import scala.collection.immutable.Seq;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -30,8 +23,11 @@ public class UserController {
     @Autowired
     MessageIndexService messageIndexService;
 
+    @Autowired
+    ContactIndexService contactIndexService;
+
     @PostMapping("/register")
-    public ResponseEntity<Object> register(@RequestBody User user){
+    public ResponseEntity<Object> register(@RequestBody User user) {
         try {
             var registeredUser = userService.register(DirectMappingConverter.toModel(user));
             return ResponseEntity.ok(DirectMappingConverter.toMapping(registeredUser, com.ftn.ues.email_client.model.User.class, User.class));
@@ -39,11 +35,12 @@ public class UserController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+
     @Autowired
     UserRepository repository;
 
     @GetMapping()
-    public ResponseEntity<Object> getAll(){
+    public ResponseEntity<Object> getAll() {
         try {
             var registeredUsers = repository.findAll();
             return ResponseEntity.ok(DirectMappingConverter.toMapping(registeredUsers, com.ftn.ues.email_client.model.User.class, User.class));
@@ -52,12 +49,13 @@ public class UserController {
         }
     }
 
-    @Autowired
-    ObjectMapper objectMapper;
-
     @GetMapping("/{id}/messages")
-    public Seq<Message> getMessages(@RequestParam Map<String, String> params, @PathVariable("id") Long id) {
+    public Seq<com.ftn.ues.email_client.dao.elastic.Message> getMessages(@RequestParam Map<String, String> params, @PathVariable("id") Long id) {
         return messageIndexService.findMessages(id, params);
     }
 
+    @GetMapping("/{id}/contacts")
+    public Seq<com.ftn.ues.email_client.dao.elastic.Contact> getContacts(@RequestParam Map<String, String> params, @PathVariable("id") Long id) {
+        return contactIndexService.findContacts(id, params);
+    }
 }

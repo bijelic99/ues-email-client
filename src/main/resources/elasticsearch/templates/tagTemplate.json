@@ -4,7 +4,23 @@
     "tag*"
   ],
   "settings": {
-    "number_of_shards": 2
+    "number_of_shards": 2,
+    "analysis": {
+      "analyzer": {
+        "default": {
+          "type": "serbian",
+          "filter": [
+            "lowercase"
+          ]
+        }
+      },
+      "default_search": {
+        "type": "serbian",
+        "filter": [
+          "lowercase"
+        ]
+      }
+    }
   },
   "mappings": {
     "_source": {
@@ -12,11 +28,10 @@
     },
     "properties": {
       "id": {
-        "type": "long"
+        "type": "keyword"
       },
       "name": {
         "type": "text",
-        "analyzer": "serbian",
         "fields": {
           "keyword": {
             "type": "keyword"
@@ -24,7 +39,7 @@
         }
       },
       "userId": {
-        "type": "long"
+        "type": "keyword"
       },
       "deleted": {
         "type": "boolean"

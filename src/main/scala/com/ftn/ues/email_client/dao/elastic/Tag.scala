@@ -9,7 +9,7 @@ object Tag {
     Tag(
       tag.getId,
       tag.getName,
-      tag.getId,
+      tag.getUser.getId,
       tag.getDeleted
     )
 

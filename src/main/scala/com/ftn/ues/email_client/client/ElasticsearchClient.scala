@@ -1,6 +1,7 @@
 package com.ftn.ues.email_client.client
 
 import com.ftn.ues.email_client.client.util.LoadResourceFile
+import org.apache.logging.log4j.LogManager
 import play.api.libs.json.JsObject
 import play.api.libs.ws.JsonBodyWritables.writeableOf_JsValue
 import play.api.libs.ws.StandaloneWSClient
@@ -11,13 +12,15 @@ import scala.util.{Failure, Success}
 
 
 abstract class ElasticsearchClient(
-                                    endpoint: String,
-                                    indexName: String,
-                                    templateName: String,
-                                    templateFilename: String,
+                                    protected val endpoint: String,
+                                    protected val indexName: String,
+                                    protected val templateName: String,
+                                    protected val templateFilename: String,
                                     wsClient: StandaloneWSClient
                                   )
                                   (implicit ec: ExecutionContext) {
+  protected final val log = LogManager.getLogger(classOf[ElasticsearchClient])
+
   @PostConstruct
   def init: Future[Unit] = {
     def handleTemplate = checkTemplate.flatMap(if (_) Future.successful() else putTemplate)
@@ -27,7 +30,7 @@ abstract class ElasticsearchClient(
     pingEndpoint
       .flatMap(_ => handleTemplate)
       .flatMap(_ => handleIndex)
-      .recover(t => println(t.getMessage))
+      .recover(t => log.error(t.getMessage))
   }
 
   def pingEndpoint: Future[Unit] = wsClient
@@ -35,7 +38,7 @@ abstract class ElasticsearchClient(
     .head()
     .collect {
       case res if res.status == 200 =>
-        println(s"Endpoint '$endpoint' pinged successfully")
+        log.info(s"Endpoint '$endpoint' pinged successfully")
       case res =>
         throw new Exception(s"Endpoint '$endpoint' not available, got ${res.status} code")
     }
@@ -47,7 +50,7 @@ abstract class ElasticsearchClient(
       case res if res.status == 200 =>
         true
       case res =>
-        println(s"Template '$templateName' not available, got ${res.status} code")
+        log.info(s"Template '$templateName' not available, got ${res.status} code")
         false
     }
 
@@ -58,7 +61,7 @@ abstract class ElasticsearchClient(
           .put(template)
           .collect {
             case res if res.status == 200 =>
-              println(s"Template '$templateName' put")
+              log.info(s"Template '$templateName' put")
             case res =>
               throw new Exception(s"Template '$templateName' put failed got ${res.status} code")
           }
@@ -72,7 +75,7 @@ abstract class ElasticsearchClient(
       case res if res.status == 200 =>
         true
       case res =>
-        println(s"Index '${indexName}' not present, got ${res.status} code")
+        log.info(s"Index '${indexName}' not present, got ${res.status} code")
         false
     }
 
@@ -80,7 +83,7 @@ abstract class ElasticsearchClient(
     .url(s"$endpoint/$indexName")
     .put(JsObject.empty).collect {
     case res if res.status == 200 =>
-      println(s"Created index '$indexName'")
+      log.info(s"Created index '$indexName'")
     case res =>
       throw new Exception(s"Failed to create index '$indexName', got ${res.status} code")
   }

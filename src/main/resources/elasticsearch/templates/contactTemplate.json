@@ -4,7 +4,23 @@
     "contact*"
   ],
   "settings": {
-    "number_of_shards": 2
+    "number_of_shards": 2,
+    "analysis": {
+      "analyzer": {
+        "default": {
+          "type": "serbian",
+          "filter": [
+            "lowercase"
+          ]
+        }
+      },
+      "default_search": {
+        "type": "serbian",
+        "filter": [
+          "lowercase"
+        ]
+      }
+    }
   },
   "mappings": {
     "_source": {
@@ -12,11 +28,10 @@
     },
     "properties": {
       "id": {
-        "type": "long"
+        "type": "keyword"
       },
       "firstName": {
         "type": "text",
-        "analyzer": "serbian",
         "fields": {
           "keyword": {
             "type": "keyword"
@@ -25,7 +40,6 @@
       },
       "lastName": {
         "type": "text",
-        "analyzer": "serbian",
         "fields": {
           "keyword": {
             "type": "keyword"
@@ -34,7 +48,6 @@
       },
       "displayName": {
         "type": "text",
-        "analyzer": "serbian",
         "fields": {
           "keyword": {
             "type": "keyword"
@@ -42,17 +55,16 @@
         }
       },
       "email": {
-        "type": "keyword"
+        "type": "text"
       },
       "note": {
-        "type": "text",
-        "analyzer": "serbian"
+        "type": "text"
       },
       "photoIds": {
-        "type": "long"
+        "type": "keyword"
       },
       "userId": {
-        "type": "long"
+        "type": "keyword"
       },
       "deleted": {
         "type": "boolean"

@@ -1,8 +1,6 @@
 package com.ftn.ues.email_client.service.implementation;
 
-import com.ftn.ues.email_client.model.Account;
-import com.ftn.ues.email_client.model.Folder;
-import com.ftn.ues.email_client.model.Pop3IngestServiceParams;
+import com.ftn.ues.email_client.model.*;
 import com.ftn.ues.email_client.repository.database.FolderRepository;
 import com.ftn.ues.email_client.repository.database.MessageRepository;
 import com.ftn.ues.email_client.service.FolderService;
@@ -26,6 +24,9 @@ public class FolderServiceImpl implements FolderService {
     @Autowired
     Pop3IngestService pop3IngestService;
 
+    @Autowired
+    ImapIngestService imapIngestService;
+
     @Override
     public Set<Folder> fetchFolderStructure(Account account) throws MessagingException {
         var folders = mailClientService.fetchFolderStructure(account);
@@ -36,9 +37,10 @@ public class FolderServiceImpl implements FolderService {
     @Override
     public Folder refreshFolder(Long id) throws MessagingException {
         var folder = folderRepository.findById(id).orElseThrow();
-        pop3IngestService.ingestNewMail(new Pop3IngestServiceParams(folder.getAccount()));
+        if(folder.getAccount().getInServerType().equals(InServerType.POP3))
+            pop3IngestService.ingestNewMail(new Pop3IngestServiceParams(folder.getAccount()));
+        else imapIngestService.ingestNewMail(new ImapIngestServiceParams(folder.getAccount(), folder));
         folder = folderRepository.findById(id).orElseThrow();
-        //folder = mailClientService.refreshFolder(folder);
-        return folder;//folderRepository.save(folder);
+        return folder;
     }
 }

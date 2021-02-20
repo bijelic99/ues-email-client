@@ -26,9 +26,7 @@ public class RuleServiceImpl implements RuleService {
     @Autowired
     AttachmentRepository attachmentRepository;
 
-    @Override
-    public void executeRules(Account account, Set<Long> messagesToExecuteOn) {
-        // TODO Implement this
+    private List<Message> executeRulesAndReturnLeftover(Account account, Set<Long> messagesToExecuteOn) {
         var messages = messageRepository.findAllById(messagesToExecuteOn);
         var rules = account.getAccountRules();
         for (Rule rule : rules) {
@@ -64,7 +62,12 @@ public class RuleServiceImpl implements RuleService {
             executeRule(account, rule, ruleHits);
             messages = ruleMisses;
         }
-        List<Message> leftOverMessages = messages;
+        return messages;
+    }
+
+    @Override
+    public void executeRules(Account account, Set<Long> messagesToExecuteOn) {
+        List<Message> leftOverMessages = executeRulesAndReturnLeftover(account, messagesToExecuteOn);
         account.getFolders().stream().filter(Folder::getMainInbox).findFirst().ifPresent(folder -> {
             messageRepository.saveAll(leftOverMessages.stream().map(msg -> {
                 msg.setParentFolder(folder);
@@ -119,6 +122,8 @@ public class RuleServiceImpl implements RuleService {
 
     @Override
     public void executeRules(Account account, Folder folder, Set<Long> messagesToExecuteOn) {
-
+        List<Message> leftOverMessages = executeRulesAndReturnLeftover(account, messagesToExecuteOn);
+        folder.getMessages().addAll(leftOverMessages);
+        folderRepository.save(folder);
     }
 }

@@ -1,14 +1,15 @@
 package com.ftn.ues.email_client.util
 
-import com.ftn.ues.email_client.util.MessageSearchableFields.{Account, ParentFolder}
+import com.ftn.ues.email_client.model.searchable_fields.MessageSearchableFields.{Account, ParentFolder}
+import com.ftn.ues.email_client.model.searchable_fields.{ContactSearchableFields, MessageSearchableFields, NestedField}
 import play.api.libs.json.{JsObject, Json}
 
 object QueryBuilder {
 
-  def createMessagesQuery(userId: Long, params: Map[String, String]) = {
+  def createMessagesQuery(userId: Long, params: Map[String, String]): JsObject = {
     val (filterFields, shouldFields) = params
       .flatMap {
-        case (key, value) => MessageSearchableFields.parseFieldFromString(key).map((_, value))
+        case (key, value) => MessageSearchableFields.parseFieldFromString(key).map(_ -> value)
       }
       .partition {
         case (key, _) => Seq(Account, ParentFolder).contains(key)
@@ -23,10 +24,38 @@ object QueryBuilder {
     val shouldQueries = shouldFields
       .toSeq
       .flatMap {
-        case (fieldNames, value) => fieldNames.fields.map(termQuery(_, value, Some(5)))
+        case (searchableTerm: NestedField, value) => searchableTerm.fields.map(x => nestedQuery(searchableTerm.path, matchQuery(x, value)))
+        case (searchableTerm, value) => searchableTerm.fields.map(matchQuery(_, value))
       }
 
     Json.obj("size" -> 10000,
+      "query" -> Json.obj(
+        "bool" -> Json.obj(
+          "filter" -> filterQueries,
+          "should" -> shouldQueries,
+          "minimum_should_match" -> (if (shouldQueries.size > 0) 1 else 0)
+        )
+      )
+    )
+  }
+
+  def createContactQuery(userId: Long, params: Map[String, String]): JsObject = {
+    val shouldFields = params.flatMap {
+      case (key, value) => ContactSearchableFields.parseFieldFromString(key).map(_ -> value)
+    }
+
+    val shouldQueries = shouldFields
+      .toSeq
+      .flatMap {
+        case (searchableTerm, value) => searchableTerm.fields.map(matchQuery(_, value))
+      }
+
+    val filterQueries = Seq(
+      termQuery("userId", userId.toString)
+    )
+
+    Json.obj(
+      "size" -> 10000,
       "query" -> Json.obj(
         "bool" -> Json.obj(
           "filter" -> filterQueries,
@@ -49,39 +78,24 @@ object QueryBuilder {
     )
   )
 
+  private def nestedQuery(path: String, query: JsObject) = Json.obj(
+    "nested" -> Json.obj(
+      "path" -> path,
+      "query" -> query
+    )
+  )
+
+  private def matchQuery(field: String, value: String, operator: String = "or", minimumShouldMatch: Int = 1) = Json.obj(
+    "match" -> Json.obj(
+      field -> Json.obj(
+        "query" -> value,
+        "operator" -> operator,
+        "minimum_should_match" -> minimumShouldMatch
+      )
+    )
+  )
+
 }
 
-abstract class SearchableField(val fields: Seq[String])
-
-trait SearchableFields {
-  def parseFieldFromString(fieldName: String): Option[SearchableField]
-}
-
-object MessageSearchableFields extends SearchableFields {
-
-  case object Sender extends SearchableField(Seq("from"))
-
-  case object Recipient extends SearchableField(Seq("to", "cc", "bcc"))
-
-  case object Subject extends SearchableField(Seq("subject"))
-
-  case object Content extends SearchableField(Seq("content"))
-
-  case object Attachment extends SearchableField(Seq("attachments.metadata.content"))
-
-  case object ParentFolder extends SearchableField(Seq("parentFolderId"))
-
-  case object Account extends SearchableField(Seq("accountId"))
 
 
-  override def parseFieldFromString(fieldName: String): Option[SearchableField] = fieldName match {
-    case "sender" => Some(Sender)
-    case "recipient" => Some(Recipient)
-    case "subject" => Some(Subject)
-    case "content" => Some(Content)
-    case "attachment" => Some(Attachment)
-    case "parentFolder" => Some(ParentFolder)
-    case "account" => Some(Account)
-    case _ => None
-  }
-}

@@ -21,4 +21,5 @@ public interface MailClientService {
     Folder refreshFolder(Folder folder) throws MessagingException;
     Message sendMessage(Message message) throws MessagingException;
     Set<MessageRaw> getNewPop3Messages(Account account) throws MessagingException;
+    Set<MessageRaw> getNewImapMessages(Account account, Folder folder) throws MessagingException;
 }

@@ -4,7 +4,23 @@
     "message*"
   ],
   "settings": {
-    "number_of_shards": 2
+    "number_of_shards": 2,
+    "analysis": {
+      "analyzer": {
+        "default": {
+          "type": "serbian",
+          "filter": [
+            "lowercase"
+          ]
+        }
+      },
+      "default_search": {
+        "type": "serbian",
+        "filter": [
+          "lowercase"
+        ]
+      }
+    }
   },
   "mappings": {
     "_source": {
@@ -18,28 +34,26 @@
         "type": "keyword"
       },
       "from": {
-        "type": "keyword"
+        "type": "text"
       },
       "to": {
-        "type": "keyword"
+        "type": "text"
       },
       "cc": {
-        "type": "keyword"
+        "type": "text"
       },
       "bcc": {
-        "type": "keyword"
+        "type": "text"
       },
       "dateTime": {
         "type": "date",
         "format": "dd-MM-yyyy HH:mm:ss"
       },
       "subject": {
-        "type": "text",
-        "analyzer": "serbian"
+        "type": "text"
       },
       "content": {
-        "type": "text",
-        "analyzer": "serbian"
+        "type": "text"
       },
       "unread": {
         "type": "boolean"
@@ -57,18 +71,51 @@
             "type": "keyword"
           },
           "name": {
-            "type": "keyword"
+            "type": "text"
           },
           "messageId": {
             "type": "keyword"
           },
           "data": {
             "type": "binary"
+          },
+          "metadata": {
+            "type": "nested",
+            "properties": {
+              "date": {
+                "type": "date"
+              },
+              "language": {
+                "type": "keyword"
+              },
+              "content": {
+                "type": "text"
+              }
+            }
           }
         }
       },
       "tags": {
-        "type": "keyword"
+        "type": "nested",
+        "properties": {
+          "id": {
+            "type": "keyword"
+          },
+          "name": {
+            "type": "text",
+            "fields": {
+              "keyword": {
+                "type": "keyword"
+              }
+            }
+          },
+          "userId": {
+            "type": "keyword"
+          },
+          "deleted": {
+            "type": "boolean"
+          }
+        }
       },
       "parentFolderId": {
         "type": "keyword"
@@ -80,12 +127,10 @@
         "type": "boolean"
       },
       "abstractText": {
-        "type": "text",
-        "analyzer": "serbian"
+        "type": "text"
       },
       "fullText": {
-        "type": "text",
-        "analyzer": "serbian"
+        "type": "text"
       }
     }
   }

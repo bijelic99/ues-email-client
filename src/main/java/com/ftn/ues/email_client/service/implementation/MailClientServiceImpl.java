@@ -9,6 +9,8 @@ import com.ftn.ues.email_client.service.FileStorageService;
 import com.ftn.ues.email_client.service.IndexingService;
 import com.ftn.ues.email_client.service.MailClientService;
 import com.ftn.ues.email_client.util.JavaxMailMessageToMessageConverter;
+import com.sun.mail.imap.IMAPFolder;
+import com.sun.mail.imap.IMAPStore;
 import com.sun.mail.pop3.POP3Folder;
 import com.sun.mail.pop3.POP3Store;
 import lombok.extern.log4j.Log4j2;
@@ -118,8 +120,43 @@ public class MailClientServiceImpl implements MailClientService {
         return new HashSet<>(Collections.singletonList(newFolder));
     }
 
-    private Set<Folder> fetchImapFolderStructure(@NonNull Account account) {
-        return null;
+    private Set<Folder> fetchImapFolderStructure(@NonNull Account account) throws MessagingException {
+        var store = (IMAPStore) getStore(account);
+        store.connect();
+        javax.mail.Folder rootFolder = store.getDefaultFolder();
+        Folder defaultFolder = createImapFolderStructure(rootFolder, null, account, true);
+        return new HashSet<>(Collections.singletonList(defaultFolder));
+    }
+
+    private Folder createImapFolderStructure(javax.mail.Folder folder, Folder parentFolder, Account account, boolean isDefaultFolder)
+            throws MessagingException {
+        var currentFolder = Folder.builder()
+                .folderUrl(folder.getURLName().toString())
+                .name(folder.getName())
+                .account(account)
+                .parentFolder(parentFolder)
+                .children(new HashSet<>())
+                .messages(new HashSet<>())
+                .name(folder.getName())
+                .isMainInbox(isDefaultFolder)
+                .build();
+        Set<Folder> children = new HashSet<Folder>();
+        if (folder.getType() == javax.mail.Folder.HOLDS_FOLDERS) {
+            children = Arrays.stream(folder.list())
+                    .flatMap(child -> {
+                                try {
+                                    return Optional.of(createImapFolderStructure(child, parentFolder, account, false)).stream();
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                    return Optional.empty().stream();
+                                }
+                            }
+                    )
+                    .map(o -> (Folder) o)
+                    .collect(Collectors.toSet());
+        }
+        currentFolder.setChildren(children);
+        return currentFolder;
     }
 
     @Override
@@ -251,9 +288,6 @@ public class MailClientServiceImpl implements MailClientService {
         attachmentRepository.saveAll(attachments);
         newMessages = messageRepository.findAllById(newMessages.stream().map(Identifiable::getId).collect(Collectors.toSet()));
 
-        // TODO fix
-        //if (!indexingService.indexMessage(newMessages.toArray(Message[]::new))) log.error("Indexing unsuccessful");
-
         folder.getMessages().addAll(newMessages);
         return folder;
     }
@@ -265,7 +299,7 @@ public class MailClientServiceImpl implements MailClientService {
         POP3Folder serverFolder = (POP3Folder) store.getFolder("INBOX");
         serverFolder.open(javax.mail.Folder.READ_ONLY);
 
-         return Arrays.stream(serverFolder.getMessages())
+        return Arrays.stream(serverFolder.getMessages())
                 .map(message -> {
                     try {
                         return JavaxMailMessageToMessageConverter
@@ -276,7 +310,87 @@ public class MailClientServiceImpl implements MailClientService {
                 }).collect(Collectors.toSet());
     }
 
-    private Folder refreshImapFolder(Folder folder) {
-        return null;
+    @Override
+    public Set<MessageRaw> getNewImapMessages(Account account, Folder folder) throws MessagingException {
+        var store = (IMAPStore) getStore(folder.getAccount());
+        store.connect();
+
+        var refreshedFolder = (IMAPFolder) store.getFolder(new URLName(folder.getFolderUrl()));
+        refreshedFolder.open(javax.mail.Folder.READ_ONLY);
+
+        return Arrays.stream(refreshedFolder.getMessages())
+                .map(message -> {
+                    try {
+                        return JavaxMailMessageToMessageConverter
+                                .convertToRawMessage(message, refreshedFolder.getUID(message)+"");
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
+                }).collect(Collectors.toSet());
+    }
+
+    private Folder refreshImapFolder(Folder folder) throws MessagingException {
+        var store = (IMAPStore) getStore(folder.getAccount());
+        store.connect();
+
+        var refreshedFolder = (IMAPFolder) store.getFolder(new URLName(folder.getFolderUrl()));
+        refreshedFolder.open(javax.mail.Folder.READ_ONLY);
+
+        var newMessages = Arrays.stream(refreshedFolder.getMessages())
+                .flatMap(message -> {
+                    var resOpt = Optional.empty();
+                    try {
+                        resOpt = Optional.of(JavaxMailMessageToMessageConverter.convertToMessage(message, refreshedFolder.getUID(message) + ""));
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                    return resOpt.stream().map(o -> (JavaxMailMessageToMessageConverter.ParsedMessage) o);
+                })
+                .map(parsedMessage -> {
+                    var message = com.ftn.ues.email_client.model.Message.builder()
+                            .id(null)
+                            .messageUid(parsedMessage.getId())
+                            .from(parsedMessage.getFrom())
+                            .to(parsedMessage.getTo())
+                            .cc(parsedMessage.getCc())
+                            .bcc(parsedMessage.getBcc())
+                            .dateTime(parsedMessage.getDateTime())
+                            .subject(parsedMessage.getSubject())
+                            .content(parsedMessage.getContent())
+                            .unread(false)
+                            .parentFolder(folder)
+                            .account(folder.getAccount())
+                            .build();
+                    var attachments = parsedMessage.getAttachments().stream()
+                            .flatMap(attachmentData -> {
+                                var resOpt = Optional.empty();
+                                try {
+                                    var path = fileStorageService.addAttachment(attachmentData);
+                                    resOpt = Optional.of(Attachment.builder()
+                                            .id(null)
+                                            .path(path)
+                                            .mimeType(attachmentData.getMimeType())
+                                            .name(attachmentData.getFilename())
+                                            .message(message)
+                                            .build());
+                                } catch (Exception e) {
+                                    e.printStackTrace();
+                                }
+                                return resOpt.stream().map(o -> (Attachment) o);
+                            }).collect(Collectors.toSet());
+                    message.setAttachments(attachments);
+                    return message;
+                })
+                .filter(message -> folder.getMessages().stream().noneMatch(m -> m.getMessageUid().equals(message.getMessageUid()))
+                )
+                .collect(Collectors.toList());
+
+        newMessages = messageRepository.saveAll(newMessages);
+        var attachments = newMessages.stream().map(Message::getAttachments).flatMap(Collection::stream).collect(Collectors.toList());
+        attachmentRepository.saveAll(attachments);
+        newMessages = messageRepository.findAllById(newMessages.stream().map(Identifiable::getId).collect(Collectors.toSet()));
+
+        folder.getMessages().addAll(newMessages);
+        return folder;
     }
 }

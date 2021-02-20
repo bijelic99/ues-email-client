@@ -37,7 +37,9 @@ class MessageIndexService @Inject()(messageESClient: MessageESClient,
         )
       }
         .map(messageESClient.putMessage)
-    }.map(_.asJavaCollection), timeout)
+    }
+      .map(_.flatten)
+      .map(_.asJavaCollection), timeout)
 
   def findMessages(userId: Long, params: java.util.Map[String, String]): Seq[Message] = Await.result(
     messageESClient.searchForMessages(userId, params.asScala.toMap),
