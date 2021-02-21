@@ -24,8 +24,7 @@ public class AccountServiceImpl implements AccountService {
 
     @Override
     public Account addAccount(Account account) throws Exception {
-        var userOpt = userRepository.findById(account.getUser().getId());
-        if (userOpt.isEmpty()) throw new Exception("Cannot add an account for non existing user");
+        userRepository.findById(account.getUser().getId()).orElseThrow();
         accountRepository.save(account);
         folderService.fetchFolderStructure(account);
         return accountRepository.getOne(account.getId());

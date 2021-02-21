@@ -26,6 +26,7 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.util.ByteArrayDataSource;
+import java.net.MalformedURLException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -58,13 +59,13 @@ public class MailClientServiceImpl implements MailClientService {
             case POP3: {
                 properties.put("mail.pop3.host", account.getInServerAddress());
                 properties.put("mail.pop3.port", account.getInServerPort());
-                properties.put("mail.pop3.ssl.enable", "false");
+                properties.put("mail.pop3.ssl.enable", "true");
                 break;
             }
             case IMAP: {
                 properties.put("mail.imap.host", account.getInServerAddress());
                 properties.put("mail.imap.port", account.getInServerPort());
-                properties.put("mail.imap.ssl.enable", "false");
+                properties.put("mail.imap.ssl.enable", "true");
                 break;
             }
             default: {
@@ -91,7 +92,7 @@ public class MailClientServiceImpl implements MailClientService {
     }
 
     @Override
-    public Set<Folder> fetchFolderStructure(@NonNull Account account) throws MessagingException {
+    public Set<Folder> fetchFolderStructure(@NonNull Account account) throws MessagingException, MalformedURLException {
         switch (account.getInServerType()) {
             case POP3: {
                 return fetchPop3FolderStructure(account);
@@ -114,13 +115,13 @@ public class MailClientServiceImpl implements MailClientService {
                 .account(account)
                 .children(new HashSet<>())
                 .messages(new HashSet<>())
-                .name(defaultFolder.getName())
+                .name("Inbox")
                 .isMainInbox(true)
                 .build();
         return new HashSet<>(Collections.singletonList(newFolder));
     }
 
-    private Set<Folder> fetchImapFolderStructure(@NonNull Account account) throws MessagingException {
+    private Set<Folder> fetchImapFolderStructure(@NonNull Account account) throws MessagingException, MalformedURLException {
         var store = (IMAPStore) getStore(account);
         store.connect();
         javax.mail.Folder rootFolder = store.getDefaultFolder();
@@ -129,10 +130,10 @@ public class MailClientServiceImpl implements MailClientService {
     }
 
     private Folder createImapFolderStructure(javax.mail.Folder folder, Folder parentFolder, Account account, boolean isDefaultFolder)
-            throws MessagingException {
+            throws MessagingException, MalformedURLException {
         var currentFolder = Folder.builder()
                 .folderUrl(folder.getURLName().toString())
-                .name(folder.getName())
+                .name( folder.getName() == null || folder.getName().isBlank() ? "Folder" : folder.getName())
                 .account(account)
                 .parentFolder(parentFolder)
                 .children(new HashSet<>())
@@ -160,7 +161,7 @@ public class MailClientServiceImpl implements MailClientService {
     }
 
     @Override
-    public Folder refreshFolder(@NonNull Folder folder) throws MessagingException {
+    public Folder refreshFolder(@NonNull Folder folder) throws MessagingException, MalformedURLException {
         switch (folder.getAccount().getInServerType()) {
             case POP3: {
                 return refreshPop3Folder(folder);
@@ -329,7 +330,7 @@ public class MailClientServiceImpl implements MailClientService {
                 }).collect(Collectors.toSet());
     }
 
-    private Folder refreshImapFolder(Folder folder) throws MessagingException {
+    private Folder refreshImapFolder(Folder folder) throws MessagingException, MalformedURLException {
         var store = (IMAPStore) getStore(folder.getAccount());
         store.connect();
 

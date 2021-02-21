@@ -9,5 +9,6 @@ public class ImapIngestServiceParams extends IngestServiceParams{
 
     public ImapIngestServiceParams(@NonNull Account account, Folder folder) {
         super(account);
+        this.folder = folder;
     }
 }

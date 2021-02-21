@@ -123,7 +123,9 @@ public class RuleServiceImpl implements RuleService {
     @Override
     public void executeRules(Account account, Folder folder, Set<Long> messagesToExecuteOn) {
         List<Message> leftOverMessages = executeRulesAndReturnLeftover(account, messagesToExecuteOn);
-        folder.getMessages().addAll(leftOverMessages);
-        folderRepository.save(folder);
+        leftOverMessages.stream().forEach(message -> {
+            message.setParentFolder(folder);
+            messageRepository.save(message);
+        });
     }
 }

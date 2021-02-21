@@ -19,7 +19,7 @@ object QueryBuilder {
       .toSeq
       .flatMap {
         case (fieldNames, value) => fieldNames.fields.map(termQuery(_, value))
-      } :+ termQuery("userId", userId.toString)
+      } :+ termQuery("userId", userId) :+ termQuery("deleted", false)
 
     val shouldQueries = shouldFields
       .toSeq
@@ -33,7 +33,7 @@ object QueryBuilder {
         "bool" -> Json.obj(
           "filter" -> filterQueries,
           "should" -> shouldQueries,
-          "minimum_should_match" -> (if (shouldQueries.size > 0) 1 else 0)
+          "minimum_should_match" -> (if (shouldQueries.nonEmpty) 1 else 0)
         )
       )
     )
@@ -51,7 +51,8 @@ object QueryBuilder {
       }
 
     val filterQueries = Seq(
-      termQuery("userId", userId.toString)
+      termQuery("userId", userId),
+      termQuery("deleted", false)
     )
 
     Json.obj(
@@ -66,7 +67,7 @@ object QueryBuilder {
     )
   }
 
-  private def termQuery(field: String, value: String, boost: Option[Double] = None) = Json.obj(
+  private def termQuery(field: String, value: Json.JsValueWrapper, boost: Option[Double] = None) = Json.obj(
     "term" -> Json.obj(
       field -> (Json.obj(
         "value" -> value
@@ -85,7 +86,7 @@ object QueryBuilder {
     )
   )
 
-  private def matchQuery(field: String, value: String, operator: String = "or", minimumShouldMatch: Int = 1) = Json.obj(
+  private def matchQuery(field: String, value: Json.JsValueWrapper, operator: String = "or", minimumShouldMatch: Int = 1) = Json.obj(
     "match" -> Json.obj(
       field -> Json.obj(
         "query" -> value,

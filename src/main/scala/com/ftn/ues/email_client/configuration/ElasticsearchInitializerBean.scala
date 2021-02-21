@@ -1,6 +1,7 @@
 package com.ftn.ues.email_client.configuration
 
 import com.ftn.ues.email_client.client.util.LoadResourceFile
+import org.apache.logging.log4j.LogManager
 import org.springframework.beans.factory.InitializingBean
 import org.springframework.stereotype.Component
 import play.api.libs.ws.JsonBodyWritables.writeableOf_JsValue
@@ -19,6 +20,7 @@ class ElasticsearchInitializerBean @Inject()(
                                               implicit ec: ExecutionContext
                                             ) extends InitializingBean {
 
+  protected final val log = LogManager.getLogger(classOf[ElasticsearchInitializerBean])
 
   override def afterPropertiesSet(): Unit =
     isPiplineCreated.flatMap(if (_) Future.successful() else putPipeline).recover( t => t.printStackTrace())
@@ -28,10 +30,10 @@ class ElasticsearchInitializerBean @Inject()(
     .get()
     .collect {
       case res if res.status == 200 =>
-        println(s"Pipeline '${config.pipelineName}' present")
+        log.info(s"Pipeline '${config.pipelineName}' present")
         true
       case res =>
-        println(s"Pipeline '${config.pipelineName}' not found got '${res.status}'")
+        log.warn(s"Pipeline '${config.pipelineName}' not found got '${res.status}'")
         false
     }
 
@@ -43,12 +45,12 @@ class ElasticsearchInitializerBean @Inject()(
         .put(template)
         .collect {
           case res if res.status == 200 =>
-            println(s"Put pipeline '${config.pipelineName}'")
+            log.info(s"Put pipeline '${config.pipelineName}'")
           case res =>
             throw new Exception(s"Failed to put '${config.pipelineName}', got '${res.status}' code")
         }
     case Failure(exception) =>
-      println(s"Failed to get pipeline config for '${config.pipelineName}")
+      log.error(s"Failed to get pipeline config for '${config.pipelineName}")
       Future.failed(exception)
   }
 

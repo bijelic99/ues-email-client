@@ -12,6 +12,7 @@ import java.util.Optional;
 
 public interface ContactService {
     Contact addContact(Contact contact, MultipartFile photo) throws NoSuchElementException, IOException, ServerException, InsufficientDataException, NoSuchAlgorithmException, InternalException, InvalidResponseException, XmlParserException, InvalidKeyException, ErrorResponseException;
-    Contact update(Contact contact);
-    Boolean contact(Long id);
+    Contact putContact(Contact contact, MultipartFile photo) throws NoSuchElementException, IOException, ServerException, InsufficientDataException, NoSuchAlgorithmException, InternalException, InvalidResponseException, XmlParserException, InvalidKeyException, ErrorResponseException;
+    Boolean deleteContact(Long id);
+    Optional<Contact> getContact(Long id);
 }

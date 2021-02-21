@@ -1,6 +1,9 @@
 package com.ftn.ues.email_client.controller;
 
+import com.ftn.ues.email_client.dao.rest.Account;
+import com.ftn.ues.email_client.dao.rest.Folder;
 import com.ftn.ues.email_client.dao.rest.User;
+import com.ftn.ues.email_client.repository.database.FolderRepository;
 import com.ftn.ues.email_client.repository.database.UserRepository;
 import com.ftn.ues.email_client.service.ContactIndexService;
 import com.ftn.ues.email_client.service.MessageIndexService;
@@ -12,6 +15,8 @@ import org.springframework.web.bind.annotation.*;
 import scala.collection.immutable.Seq;
 
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("api/user")
@@ -25,6 +30,12 @@ public class UserController {
 
     @Autowired
     ContactIndexService contactIndexService;
+
+    @Autowired
+    UserRepository userRepository;
+
+    @Autowired
+    FolderRepository folderRepository;
 
     @PostMapping("/register")
     public ResponseEntity<Object> register(@RequestBody User user) {
@@ -49,6 +60,17 @@ public class UserController {
         }
     }
 
+    @GetMapping("/{id}/folders")
+    public Set<Folder> getFolders(@PathVariable("id") Long id) {
+        return userRepository
+                .findById(id)
+                .stream()
+                .flatMap(user -> user.getUserAccounts().stream().flatMap(account -> account.getFolders().stream()))
+                .filter(folder -> !folder.getDeleted())
+                .map(Folder::new)
+                .collect(Collectors.toSet());
+    }
+
     @GetMapping("/{id}/messages")
     public Seq<com.ftn.ues.email_client.dao.elastic.Message> getMessages(@RequestParam Map<String, String> params, @PathVariable("id") Long id) {
         return messageIndexService.findMessages(id, params);
@@ -57,5 +79,15 @@ public class UserController {
     @GetMapping("/{id}/contacts")
     public Seq<com.ftn.ues.email_client.dao.elastic.Contact> getContacts(@RequestParam Map<String, String> params, @PathVariable("id") Long id) {
         return contactIndexService.findContacts(id, params);
+    }
+
+    @GetMapping("/{id}/accounts")
+    public Set<Account> getAccounts(@PathVariable("id") Long id) {
+        return userRepository.findById(id)
+                .stream()
+                .flatMap(user -> user.getUserAccounts().stream())
+                .filter(account -> !account.getDeleted())
+                .map(Account::new)
+                .collect(Collectors.toSet());
     }
 }

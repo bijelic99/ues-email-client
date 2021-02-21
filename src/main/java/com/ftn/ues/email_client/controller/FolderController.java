@@ -13,6 +13,8 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.mail.MessagingException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("api/folder")
@@ -32,6 +34,16 @@ public class FolderController {
     @GetMapping("/{id}/refresh")
     public Folder refresh(@PathVariable("id") Long id) throws InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException, MessagingException {
         return DirectMappingConverter.toMapping(folderService.refreshFolder(id), com.ftn.ues.email_client.model.Folder.class, Folder.class);
+    }
+
+    @GetMapping("/{id}/childFolders")
+    public Set<Folder> getChildFolders(@PathVariable("id") Long id) {
+        return folderRepository.findById(id)
+                .stream()
+                .flatMap(folder -> folder.getChildren().stream())
+                .filter(folder -> !folder.getDeleted())
+                .map(Folder::new)
+                .collect(Collectors.toSet());
     }
 
 }

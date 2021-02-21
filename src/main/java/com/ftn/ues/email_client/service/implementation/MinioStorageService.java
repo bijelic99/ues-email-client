@@ -3,12 +3,12 @@ package com.ftn.ues.email_client.service.implementation;
 import com.ftn.ues.email_client.configuration.ApplicationConfiguration;
 import com.ftn.ues.email_client.model.Attachment;
 import com.ftn.ues.email_client.model.AttachmentRaw;
+import com.ftn.ues.email_client.model.Photo;
 import com.ftn.ues.email_client.service.FileStorageService;
 import io.minio.GetObjectArgs;
 import io.minio.MinioClient;
 import io.minio.UploadObjectArgs;
 import io.minio.errors.*;
-import org.aspectj.bridge.AbortException;
 import org.javatuples.Pair;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -58,6 +58,26 @@ public class MinioStorageService implements FileStorageService {
         return addObjectToStorage(contact, configuration.getMinioContactPhotosBucketName());
     }
 
+    @Override
+    public Optional<Pair<String, byte[]>> getContactPhoto(Photo photo) {
+        var objArgs = GetObjectArgs.builder()
+                .bucket(configuration.getMinioContactPhotosBucketName())
+                .object(photo.getPath())
+                .build();
+        byte[] data;
+        try (var res = minioClient.getObject(objArgs)) {
+            try (var outStr = new ByteArrayOutputStream()) {
+                var contentType = res.headers().get("content-type");
+                res.transferTo(outStr);
+                data = outStr.toByteArray();
+                return Optional.of(Pair.with(contentType, data));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            return Optional.empty();
+        }
+    }
+
     public String addObjectToStorage(AttachmentRaw data, String bucketName) throws IOException, ServerException, InsufficientDataException, InternalException, InvalidResponseException, InvalidKeyException, NoSuchAlgorithmException, XmlParserException, ErrorResponseException {
         var dataId = UUID.randomUUID().toString();
         var extension = "";
@@ -83,13 +103,13 @@ public class MinioStorageService implements FileStorageService {
     public List<Pair<Attachment, AttachmentRaw>> getAttachments(Collection<Attachment> attachments) {
         return attachments.stream().map(attachment -> {
 
-            try{
+            try {
                 var objectArgs = GetObjectArgs.builder()
                         .bucket(configuration.getMinioAttachmentsBucketName())
                         .object(attachment.getPath())
                         .build();
                 byte[] data;
-                try (var res = minioClient.getObject(objectArgs)){
+                try (var res = minioClient.getObject(objectArgs)) {
                     try (var outStr = new ByteArrayOutputStream()) {
                         res.transferTo(outStr);
                         data = outStr.toByteArray();
@@ -97,8 +117,7 @@ public class MinioStorageService implements FileStorageService {
                 }
                 return new Pair<>(attachment,
                         new AttachmentRaw(attachment.getName(), attachment.getMimeType(), data));
-            }
-            catch (Exception e) {
+            } catch (Exception e) {
                 throw new RuntimeException(e);
             }
 
