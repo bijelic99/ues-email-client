@@ -40,8 +40,7 @@ public class Message extends Identifiable{
     @Type(type="org.jadira.usertype.dateandtime.joda.PersistentDateTime")
     private DateTime dateTime;
 
-    @NonNull
-    @Column(nullable = false)
+    @Column
     private String subject;
 
     @NonNull

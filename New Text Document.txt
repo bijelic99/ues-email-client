@@ -1,0 +1,13 @@
+moj.imejl.ues@yandex.com
+moj.imejl.ues
+mkjvhfpkkxbxjdpr
+imap.yandex.com
+993
+smtp.yandex.com
+465
+pop.yandex.com
+995
+
+moj.imejl.ues.2@yandex.com
+shmzzwnajzegipjr
+moj.imejl.ues.2

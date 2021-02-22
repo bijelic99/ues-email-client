@@ -94,28 +94,34 @@ public class RuleServiceImpl implements RuleService {
                                 throw new RuntimeException(e);
                             }
                         })
-                        .map(message -> {
-                            message.setId(null);
-                            message.setParentFolder(rule.getDestinationFolder());
-                            List<Attachment> atts = new ArrayList<>(message.getAttachments());
-                            message.setAttachments(new HashSet<>());
-                            var msg = messageRepository.save(message);
-                            atts = atts.stream().map(attachment -> {
-                                attachment.setId(null);
-                                attachment.setMessage(msg);
-                                return attachment;
-                            }).collect(Collectors.toList());
-                            atts = attachmentRepository.saveAll(atts);
-                            message.setAttachments(new HashSet<>(atts));
-                            message = messageRepository.save(message);
-                            return message;
-                        }).collect(Collectors.toSet());
+                        .forEach(message -> {
+                            Message finalMessage = message;
+                            if (!rule.getDestinationFolder().getMessages()
+                                    .stream().map(Message::getMessageUid).anyMatch(m -> finalMessage.getMessageUid().equals(m))) {
+                                message.setId(null);
+                                message.setParentFolder(rule.getDestinationFolder());
+                                List<Attachment> atts = new ArrayList<>(message.getAttachments());
+                                message.setAttachments(new HashSet<>());
+                                var msg = messageRepository.save(message);
+                                atts = atts.stream().map(attachment -> {
+                                    attachment.setId(null);
+                                    attachment.setMessage(msg);
+                                    return attachment;
+                                }).collect(Collectors.toList());
+                                atts = attachmentRepository.saveAll(atts);
+                                message.setAttachments(new HashSet<>(atts));
+                                message = messageRepository.save(message);
+                            }
+                        });
                 break;
             case MOVE:
-                messageRepository.saveAll(messages.stream().map(message -> {
-                    message.setParentFolder(rule.getDestinationFolder());
-                    return message;
-                }).collect(Collectors.toSet()));
+                messages.stream().forEach(message -> {
+                    if (!rule.getDestinationFolder().getMessages()
+                            .stream().map(Message::getMessageUid).anyMatch(m -> message.getMessageUid().equals(m))) {
+                        message.setParentFolder(rule.getDestinationFolder());
+                        messageRepository.save(message);
+                    }
+                });
 
         }
     }
@@ -124,8 +130,11 @@ public class RuleServiceImpl implements RuleService {
     public void executeRules(Account account, Folder folder, Set<Long> messagesToExecuteOn) {
         List<Message> leftOverMessages = executeRulesAndReturnLeftover(account, messagesToExecuteOn);
         leftOverMessages.stream().forEach(message -> {
-            message.setParentFolder(folder);
-            messageRepository.save(message);
+            if (!folder.getMessages()
+                    .stream().map(Message::getMessageUid).anyMatch(m -> message.getMessageUid().equals(m))) {
+                message.setParentFolder(folder);
+                messageRepository.save(message);
+            }
         });
     }
 }
