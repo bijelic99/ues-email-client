@@ -26,6 +26,9 @@ import javax.mail.internet.MimeBodyPart;
 import javax.mail.internet.MimeMessage;
 import javax.mail.internet.MimeMultipart;
 import javax.mail.util.ByteArrayDataSource;
+import java.io.File;
+import java.io.FileDescriptor;
+import java.io.FileOutputStream;
 import java.net.MalformedURLException;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -54,6 +57,7 @@ public class MailClientServiceImpl implements MailClientService {
         properties.put("mail.smtp.starttls.enable", "true");
         properties.put("mail.smtp.host", account.getSmtpAddress());
         properties.put("mail.smtp.port", account.getSmtpPort());
+        properties.put("mail.smtp.ssl.enable", "true");
 
         switch (account.getInServerType()) {
             case POP3: {
@@ -199,9 +203,12 @@ public class MailClientServiceImpl implements MailClientService {
                     var returnOpt = Optional.empty();
                     try {
                         var attMpart = new MimeBodyPart();
-                        attMpart.setFileName(attachmentData.getValue1().getFilename());
-                        DataSource source = new ByteArrayDataSource(attachmentData.getValue1().getData(), attachmentData.getValue1().getMimeType());
-                        attMpart.setDataHandler(new DataHandler(source));
+                        //attMpart.setFileName(attachmentData.getValue1().getFilename());
+                        var attN = attachmentData.getValue1().getFilename().split("\\.");
+                        File temp = File.createTempFile(attN[0], attN[1]);
+                        FileOutputStream fileOutputStream = new FileOutputStream(temp);
+                        fileOutputStream.write(attachmentData.getValue1().getData());
+                        attMpart.attachFile(temp);
                         returnOpt = Optional.of(attMpart);
                     } catch (Exception e) {
                         e.printStackTrace();
